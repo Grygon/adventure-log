@@ -1,4 +1,4 @@
-export const registerSettings = function() {
+export const registerSettings = function () {
 	// Register any custom module settings here
 	game.settings.register("adventure-log", "adventure-log.debug", {
 		name: "Enable Debug Mode",
@@ -7,4 +7,4 @@ export const registerSettings = function() {
 		type: Boolean,
 		default: false,
 	});
-}
+};
