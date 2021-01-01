@@ -1,0 +1,13 @@
+# IDE
+.vscode/**
+.idea/**
+
+# NPM
+node_modules/**
+package-lock.json
+
+# Build
+foundryconfig.json
+dist
+debug.log
+foundry.js
