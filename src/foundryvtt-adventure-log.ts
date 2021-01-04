@@ -7,9 +7,8 @@
 // Import TypeScript modules
 import { registerSettings } from "./module/settings.js";
 import { preloadTemplates } from "./module/preloadTemplates.js";
-import { onJournalsRendered, SetupManager } from "./module/setup.js";
+import { SetupManager } from "./module/setup.js";
 import { MODULE_NAME } from "./module/constants.js";
-import { addButton } from "./module/setup";
 
 /* ------------------------------------ */
 /* Initialize module					*/
@@ -48,6 +47,5 @@ Hooks.once("ready", function () {
 Hooks.on("getJournalDirectoryFolderContext", SetupManager.setMenu);
 
 Hooks.on('renderJournalDirectory', (app: Application, html: JQuery, data: EntityData) => {
-	addButton(html);
-	onJournalsRendered(app, html, data);
+	SetupManager.onJournalsRendered(app, html, data);
 });
