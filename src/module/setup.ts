@@ -80,6 +80,7 @@ export class SetupManager {
 		data: EntityData
 	) {
 		SetupManager.addTemplateButton(app, html, data);
+		SetupManager.setClasses(html);
 	}
 
 	/**
@@ -132,6 +133,17 @@ export class SetupManager {
 	
 			TemplatedFolder.buttonClick(event);
 		})
+	}
+	
+	static setClasses(html: JQuery<HTMLElement>) {
+		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
+
+		for(const folder in curTemplates) {
+			let el = $(html).find(`li[data-entity-id="${curTemplates[folder]}"]`);
+			if(el.length) {
+				el.addClass('journal-template');
+			}
+		}
 	}
 }
 /**
