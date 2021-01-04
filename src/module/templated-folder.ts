@@ -1,25 +1,48 @@
 import { customLog } from "./helpers";
 
-// For all templated folder actions
-export function buttonClick(event: JQuery.ClickEvent) {
-	const button = event.currentTarget;
-	const folder = button?.parentElement?.parentElement;
+export class TemplatedFolder {
+	// For all templated folder actions
+	static buttonClick(event: JQuery.ClickEvent) {
+		const button = event.currentTarget;
+		const folder = button?.parentElement?.parentElement;
 
-	let folderID = folder?.dataset["folder-id"];
+		let folderID = folder?.dataset["folderId"];
 
-	customLog(`Folder ${folderID} activated`);
+		let folderEntity = game.folders.get(folderID);
+		let templateID = folderEntity.getFlag("world","template");
 
-}
+		customLog(`Folder ${folderID} activated with template ${templateID}`);
 
-export function convert(header: any[]) {
-	let folderEl = $(header[0].parentNode);
-	let id = folderEl.data("folder-id");
-	let a = game.folders.get(id);
+		let templateEntry = <EntityData<Journal>><unknown>game.journal.get(templateID);
 
-	customLog(`New Templated Folder ${id} created`);
+		let data = {
+			name: "New Entry",
+			type: "Journal",
+			// Future-proofing a bit here
+			flags: {template: templateID},
+			// Data doesn't seem to be working anyway so I'm going to leave it blank
+			data: {}
+		};
 
-	a.setFlag("world","adventure-log_template",1)
+		JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
+			newEntry.update({
+				content: templateEntry.data.content,
+				folder: folderID
+			});
+		})
 
-	folderEl.addClass("templated-folder");
+	}
 
+	static convert(header: any[]) {
+		let folderEl = $(header[0].parentNode);
+		let id = folderEl.data("folder-id");
+		let a = game.folders.get(id);
+
+		customLog(`New Templated Folder ${id} created`);
+
+		a.setFlag("world","adventure-log_template",{flag1:"template1",flag2:"template2"})
+
+		folderEl.addClass("templated-folder");
+
+	}
 }
