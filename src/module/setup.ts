@@ -35,15 +35,39 @@ export class SetupManager {
 
 		customLog(`Converting folder ${folderID}`);
 
-		let templateID = "Test value";
+		let data = {
+			name: "Template",
+			type: "Journal",
+			// Future-proofing a bit here
+			flags: {templateFolder: folderID},
+			folder: folderID,
+			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
+			data: {}
+		};
 
-		// Current templates object
-		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
-		curTemplates[folderID] = templateID;
-		game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates)
+		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
+			// Guess we have to check this again here or TS will complain. Oh well.
+			if(!folderID) {
+				customLog("Error converting folder--ID does not exist",2);
+				return;
+			}
+	
+			let templateID = template.id;
+	
+			customLog(`Template ${templateID} created for folder ${folderID}`);
+			template.sheet.render(true);
+	
+			// Current templates object
+			let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
+			curTemplates[folderID] = templateID;
+			game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates)
+	
+			// Going to register this directly on the folder 
+			folder.setFlag("adventure-log","template",templateID)
+	
+			customLog(`Template registered to folder`)
+		})
 
-		// Going to register this directly on the folder 
-		folder.setFlag("adventure-log","template",templateID)
 
 	}
 
