@@ -9,7 +9,7 @@ export class TemplatedFolder {
 		let folderID = folder?.dataset["folderId"];
 
 		let folderEntity = game.folders.get(folderID);
-		let templateID = folderEntity.getFlag("world","template");
+		let templateID = folderEntity.getFlag("adventure-log","template");
 
 		customLog(`Folder ${folderID} activated with template ${templateID}`);
 
@@ -40,7 +40,6 @@ export class TemplatedFolder {
 
 		customLog(`New Templated Folder ${id} created`);
 
-		a.setFlag("world","adventure-log_template",{flag1:"template1",flag2:"template2"})
 
 		folderEl.addClass("templated-folder");
 

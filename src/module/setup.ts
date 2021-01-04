@@ -1,6 +1,6 @@
 import { TemplatedFolder } from "./templated-folder";
 import { customLog } from "./helpers";
-import { MODULE_ABBREV } from "./constants";
+import { MODULE_ABBREV, MODULE_ID, Settings } from './constants';
 import { template } from "handlebars";
 
 export class SetupManager {
@@ -18,10 +18,33 @@ export class SetupManager {
 			name: "Create Templated Folder",
 			icon: '<i class="fas fa-clipboard-list"></i>',
 			condition: (el: HTMLElement[]) => {
-				return !$(el[0]).hasClass("templated-folder");
+				return !$(el[0]).parent().hasClass("templated-folder");
 			},
-			callback: (header: any) => customLog("Temp"),
+			callback: (header: JQuery<HTMLElement>) => SetupManager.convertFolder(header),
 		});
+	}
+
+	static convertFolder(header: JQuery<HTMLElement>) {
+		let folderID = header.parent()[0].dataset["folderId"];
+		if(!folderID) {
+			customLog("Error converting folder--ID does not exist",2);
+			return;
+		}
+
+		let folder = game.folders.get(folderID);
+
+		customLog(`Converting folder ${folderID}`);
+
+		let templateID = "Test value";
+
+		// Current templates object
+		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
+		curTemplates[folderID] = templateID;
+		game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates)
+
+		// Going to register this directly on the folder 
+		folder.setFlag("adventure-log","template",templateID)
+
 	}
 
 	/**
@@ -32,7 +55,7 @@ export class SetupManager {
 		html: JQuery,
 		data: EntityData
 	) {
-		this.addTemplateButton(app, html, data);
+		SetupManager.addTemplateButton(app, html, data);
 	}
 
 	/**
@@ -48,9 +71,9 @@ export class SetupManager {
 	) {
 		// If we can't create entries, exit early
 		if(!game.user.can("JOURNAL_CREATE")) return;
-	
-		// Temporary hardcoded list to get basic functionality working
-		let folderIDs = ["nVNPn5GJztsPzDBI"];
+
+		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
+		let folderIDs = Object.keys(curTemplates);
 	
 		const templateButtonHtml = `
 			<a class="template-button">
