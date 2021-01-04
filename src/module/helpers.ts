@@ -2,6 +2,8 @@
  * General helper methods
  */
 
+import { MODULE_ID, MODULE_NAME, Settings } from "./constants";
+
 // For more consistent error handling
 enum ErrorLevels {
 	Debug,
@@ -12,10 +14,10 @@ enum ErrorLevels {
 }
 
 export function customLog(text: string, level: ErrorLevels = 0) {
-	const prefix = `Adventure Log |`;
+	const prefix = `${MODULE_NAME} |`;
 	switch (level) {
 		case ErrorLevels["Debug"]:
-			if (game.settings.get("adventure-log", "adventure-log.debug")) {
+			if (game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.debug}`)) {
 				console.log(`${prefix} Debug: ${text}`);
 			}
 			break;

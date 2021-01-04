@@ -1,22 +1,25 @@
 import { customLog } from "./helpers";
 
-// Manager for a folder's templates
-export class TemplatedFolder {
-	id: string;
+// For all templated folder actions
+export function buttonClick(event: JQuery.ClickEvent) {
+	const button = event.currentTarget;
+	const folder = button?.parentElement?.parentElement;
 
-	constructor(header: any[]) {
-		let folderEl = $(header[0].parentNode);
-		this.id = folderEl.data("folder-id");
+	let folderID = folder?.dataset["folder-id"];
 
-		customLog(`New Templated Folder ${this.id} created`);
+	customLog(`Folder ${folderID} activated`);
 
-		folderEl.addClass("templated-folder");
+}
 
-		JournalEntry.create({
-			name: "Template",
-			content: "Foo",
-			folder: this.id,
-			permission: { default: 3 },
-		});
-	}
+export function convert(header: any[]) {
+	let folderEl = $(header[0].parentNode);
+	let id = folderEl.data("folder-id");
+	let a = game.folders.get(id);
+
+	customLog(`New Templated Folder ${id} created`);
+
+	a.setFlag("world","adventure-log_template",1)
+
+	folderEl.addClass("templated-folder");
+
 }

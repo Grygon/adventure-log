@@ -7,13 +7,15 @@
 // Import TypeScript modules
 import { registerSettings } from "./module/settings.js";
 import { preloadTemplates } from "./module/preloadTemplates.js";
-import { SetupManager } from "./module/setup.js";
+import { onJournalsRendered, SetupManager } from "./module/setup.js";
+import { MODULE_NAME } from "./module/constants.js";
+import { addButton } from "./module/setup";
 
 /* ------------------------------------ */
 /* Initialize module					*/
 /* ------------------------------------ */
 Hooks.once("init", async function () {
-	console.log("Adventure Log | Initializing foundryvtt-adventure-log");
+	console.log(`${MODULE_NAME} | Initializing foundryvtt-adventure-log`);
 
 	// Assign custom classes and constants here
 
@@ -44,3 +46,8 @@ Hooks.once("ready", function () {
 /* For folder right click				*/
 /* ------------------------------------ */
 Hooks.on("getJournalDirectoryFolderContext", SetupManager.setMenu);
+
+Hooks.on('renderJournalDirectory', (app: Application, html: JQuery, data: EntityData) => {
+	addButton(html);
+	onJournalsRendered(app, html, data);
+});
