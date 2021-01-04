@@ -52,6 +52,17 @@ export function onJournalsRendered(
 	html: JQuery,
 	data: EntityData
 ) {
+	addTemplateButton(app, html, data);
+}
+
+function addTemplateButton(
+	app: Application,
+	html: JQuery,
+	data: EntityData
+) {
+	// If we can't create entries, exit early
+	if(!game.user.can("JOURNAL_CREATE")) return;
+
 	// Temporary hardcoded list to get basic functionality working
 	let folderIDs = ["nVNPn5GJztsPzDBI"];
 
@@ -69,6 +80,12 @@ export function onJournalsRendered(
 		let templateButton = folder
 			.find("a.create-folder")
 			.after(templateButtonHtml);
+
+		if(templateButton.length === 0) {
+			templateButton = folder
+				.find("header")
+				.append(templateButtonHtml);
+		}
 
 		// Not actually sure if I'll need this, but let's keep it for now.
 		folders.push(folder);

@@ -20,14 +20,14 @@ export class TemplatedFolder {
 			type: "Journal",
 			// Future-proofing a bit here
 			flags: {template: templateID},
-			// Data doesn't seem to be working anyway so I'm going to leave it blank
+			folder: folderID,
+			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {}
 		};
 
 		JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
 			newEntry.update({
-				content: templateEntry.data.content,
-				folder: folderID
+				content: templateEntry.data.content
 			});
 		})
 
