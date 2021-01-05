@@ -1,12 +1,24 @@
-import { customLog } from "./helpers";
-import { MODULE_ID } from "./constants";
+import { customLog, loadData } from "./helpers";
+import { MODULE_ID, Settings } from "./constants";
 
+/**
+ * Pseudo-class for use on all templated folder actions
+ * Currently we aren't using the extension, but perhaps in the future
+ */
 export class TemplatedFolder extends Folder {
-	// For all templated folder actions
+
+	/**
+	 * Assigns all custom TemplatedFolder properties to the given folder
+	 * @param folder Folder that should be treated as a TemplatedFolder after setup
+	 */
+	static customProperties(folder: Folder) {
+		(<TemplatedFolder>folder).isTemplated = true;
+		customLog(`Custom properties set on folder ${folder.id}`);
+	}
 
 	/**
 	 * On templated button click. For template creation
-	 * @param event
+	 * @param event	ClickEvent for the stamp button
 	 */
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
@@ -70,16 +82,66 @@ export class TemplatedFolder extends Folder {
 		});
 	}
 
-	static convert(header: any[]) {
-		let folderEl = $(header[0].parentNode);
-		let id = folderEl.data("folder-id");
-		let a = game.folders.get(id);
+	/**
+	 * Given a folder's header, perform all necessary setup to convert it to a templated folder
+	 * @param header Standard HTML header for the folder
+	 */
+	static convertFolder(header: JQuery<HTMLElement>) {
+		let folderID = header.parent()[0].dataset["folderId"];
+		if (!folderID) {
+			customLog("Error converting folder--ID does not exist", 2);
+			return;
+		}
 
-		customLog(`New Templated Folder ${id} created`);
+		let folder = game.folders.get(folderID);
 
-		folderEl.addClass("templated-folder");
+		customLog(`Converting folder ${folderID}`);
+
+		folder.update({
+			sorting: "m",
+		});
+
+		let data = {
+			name: "Template",
+			type: "Journal",
+			// Future-proofing a bit here
+			flags: { templateFolder: folderID },
+			folder: folderID,
+			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
+			data: {
+				sort: -999999,
+			},
+		};
+
+		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
+			// Guess we have to check this again here or TS will complain. Oh well.
+			if (!folderID) {
+				customLog("Error converting folder--ID does not exist", 2);
+				return;
+			}
+
+			let templateID = template.id;
+
+			customLog(`Template ${templateID} created for folder ${folderID}`);
+			template.sheet.render(true);
+
+			// Current templates object
+			let curTemplates = loadData();
+			curTemplates[folderID] = templateID;
+			game.settings.set(
+				MODULE_ID,
+				`${MODULE_ID}.${Settings.templates}`,
+				curTemplates
+			);
+
+			// Going to register this directly on the folder
+			folder.setFlag("adventure-log", "template", templateID);
+
+			customLog(`Template registered to folder`);
+		});
 	}
 
+	// TODO: Delete templated folders properly
 	delete(
 		options: object | undefined = {
 			deleteSubfolders: false,

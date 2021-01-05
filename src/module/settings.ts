@@ -7,7 +7,7 @@ export const registerSettings = function () {
 	game.settings.register(MODULE_ID, `${MODULE_ID}.${Settings.debug}`, {
 		name: "Enable Debug Mode",
 		scope: "client",
-		config: true,
+		config: false,
 		type: Boolean,
 		default: false,
 	});

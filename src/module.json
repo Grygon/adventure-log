@@ -2,7 +2,7 @@
 	"name": "adventure-log",
 	"title": "Adventure Log",
 	"description": "For convenient journal templating and player-run logs of your adventure",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"authors": [
 		{
 			"name": "Grygon",
@@ -15,9 +15,9 @@
 	"styles": ["foundryvtt-adventure-log.css"],
 	"minimumCoreVersion": "0.7.8",
 	"compatibleCoreVersion": "0.7.9",
-	"url": "https://github.com/Grygon/FoundryVTT-Adventure-Log",
-	"manifest": "https://raw.githubusercontent.com/Grygon/FoundryVTT-Adventure-Log/master/module.json",
-	"download": "https://github.com/Grygon/FoundryVTT-Adventure-Log/archive/master.zip",
+	"url": "https://github.com/Grygon/adventure-log",
+	"manifest": "https://raw.githubusercontent.com/Grygon/adventure-log/master/module.json",
+	"download": "https://github.com/Grygon/adventure-log/archive/master.zip",
 	"manifestPlusVersion": "1.0.0",
 	"dependencies": [
 		{

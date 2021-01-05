@@ -32,8 +32,7 @@ export class SetupManager {
 		for (var folderID in curTemplates) {
 			let folder = game.folders.get(folderID);
 
-			(<TemplatedFolder>folder).isTemplated = true;
-			customLog(`Custom properties set on folder ${folderID}`);
+			TemplatedFolder.customProperties(folder);
 		}
 	}
 
@@ -54,104 +53,15 @@ export class SetupManager {
 				return !$(el[0]).parent().hasClass("templated-folder");
 			},
 			callback: (header: JQuery<HTMLElement>) =>
-				SetupManager.convertFolder(header),
-		});
-		/** 
-		customLog("Configuring folder deletion");
-		let removeOption = options.find((item) => item.name === 'FOLDER.Remove');
-		let deleteOption = options.find((item) => item.name === 'FOLDER.Delete');
-		if(!removeOption) {
-			customLog("Unable to safely bind folder removal. Please report this",3);
-		} else {
-			// We're gonna do what's called a pro gamer move
-			let cached = removeOption.callback
-			
-			let callBack = function(header: JQuery<HTMLElement>, isDelete: boolean) {
-				const li = header.parent();
-				if(li.hasClass("templated-folder")) {
-					const folderID = li.data("folderId");
-
-					let folder = game.folders.get(folderID);
-
-					//@ts-ignore
-					folder.delete = ((options) => {
-						console.log("Foo");
-
-						folder.delete({deleteSubfolders: isDelete, deleteContents: isDelete})
-					})
-	
-					customLog(`Removing templated folder ${folderID}`);
-
-					let newTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`);
-					delete newTemplates[folderID];
-					game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, newTemplates)
-
-					customLog(`Templated folder removed, remaining templates: ${Object.keys(newTemplates).toString()}`);
-				}
-				cached(header);
-			}
-
-			removeOption.callback = callBack;
-		}*/
-	}
-
-	static convertFolder(header: JQuery<HTMLElement>) {
-		let folderID = header.parent()[0].dataset["folderId"];
-		if (!folderID) {
-			customLog("Error converting folder--ID does not exist", 2);
-			return;
-		}
-
-		let folder = game.folders.get(folderID);
-
-		customLog(`Converting folder ${folderID}`);
-
-		folder.update({
-			sorting: "m",
-		});
-
-		let data = {
-			name: "Template",
-			type: "Journal",
-			// Future-proofing a bit here
-			flags: { templateFolder: folderID },
-			folder: folderID,
-			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
-			data: {
-				sort: -999999,
-			},
-		};
-
-		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
-			// Guess we have to check this again here or TS will complain. Oh well.
-			if (!folderID) {
-				customLog("Error converting folder--ID does not exist", 2);
-				return;
-			}
-
-			let templateID = template.id;
-
-			customLog(`Template ${templateID} created for folder ${folderID}`);
-			template.sheet.render(true);
-
-			// Current templates object
-			let curTemplates = loadData();
-			curTemplates[folderID] = templateID;
-			game.settings.set(
-				MODULE_ID,
-				`${MODULE_ID}.${Settings.templates}`,
-				curTemplates
-			);
-
-			// Going to register this directly on the folder
-			folder.setFlag("adventure-log", "template", templateID);
-
-			customLog(`Template registered to folder`);
+				TemplatedFolder.convertFolder(header),
 		});
 	}
 
 	/**
 	 * Performs all setup actions desired when journals are rendered
+	 * @param app 	Page Application
+	 * @param html 	Page HTML
+	 * @param data 	Page data
 	 */
 	static onJournalsRendered(
 		app: Application,
@@ -214,6 +124,10 @@ export class SetupManager {
 		});
 	}
 
+	/**
+	 * Assigns CSS classes to all templated folders
+	 * @param html HTML to search for templates in
+	 */
 	static setClasses(html: JQuery<HTMLElement>) {
 		let curTemplates = loadData();
 
@@ -250,27 +164,4 @@ export class SetupManager {
 			curTemplates
 		);
 	}
-
-	/**
-	 * 
-	static bindTemplatedFolder(html: JQuery<HTMLElement>) {
-		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
-
-		for (var folderID in curTemplates) {
-			let folder: TemplatedFolder = game.folders.get(folderID);
-			if(!folder) {
-				delete curTemplates[folderID];
-			} else {
-				folder.testFunc = function () {
-					customLog("AFASDFASDFASDFASDF");
-					debugger;
-				}
-			}
-		}
-
-
-		game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates)
-
-	}
-	 */
 }
