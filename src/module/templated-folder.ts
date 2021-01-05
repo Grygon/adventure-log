@@ -63,9 +63,9 @@ export class TemplatedFolder extends Folder {
 				callback: (html: JQuery<HTMLElement>) => {
 					const form = html[0].querySelector("form");
 					//@ts-ignore
-					const fd = new FormDataExtended(form);
+					const fd = (new FormDataExtended(form)).toObject();
 					if (!fd["name"]) delete fd["name"];
-					data = mergeObject(data, fd.toObject());
+					data = mergeObject(data, fd);
 					JournalEntry.create(data).then(
 						(newEntry: Entity<JournalEntry>) => {
 							newEntry
