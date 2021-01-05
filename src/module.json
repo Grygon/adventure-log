@@ -31,7 +31,7 @@
   "media": [
     {
       "type": "icon",
-      "url": "link/to/media/file"
+      "url": "https://raw.githubusercontent.com/Grygon/adventure-log/master/static/icon.png"
     }
   ]
 }
