@@ -7,7 +7,8 @@
     {
       "name": "Grygon",
       "email": "grygohn@gmail.com",
-      "url": "https://www.github.com/grygon/"
+      "url": "https://www.github.com/grygon/",
+      "discord": "Grygon#9138"
     }
   ],
   "esmodules": [
@@ -21,9 +22,16 @@
   "url": "https://github.com/Grygon/FoundryVTT-Adventure-Log",
   "manifest": "https://raw.githubusercontent.com/Grygon/FoundryVTT-Adventure-Log/master/module.json",
   "download": "https://github.com/Grygon/FoundryVTT-Adventure-Log/archive/master.zip",
+  "manifestPlusVersion": "1.0.0",
   "dependencies": [
     {
         "name": "lib-wrapper"
+    }
+  ],
+  "media": [
+    {
+      "type": "icon",
+      "url": "link/to/media/file"
     }
   ]
 }

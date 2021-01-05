@@ -50,7 +50,8 @@ export class TemplatedFolder extends Folder {
 					const form = html[0].querySelector("form");
 					//@ts-ignore
 					const fd = new FormDataExtended(form);
-					data = mergeObject(fd.toObject(), data);
+					if(!fd["name"]) delete fd["name"];
+					data = mergeObject(data, fd.toObject());
 					JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
 						newEntry.update({
 							content: templateEntry.data.content
