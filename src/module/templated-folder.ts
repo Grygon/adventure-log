@@ -3,6 +3,11 @@ import { MODULE_ID } from './constants';
 
 export class TemplatedFolder extends Folder {
 	// For all templated folder actions
+
+	/**
+	 * On templated button click. For template creation
+	 * @param event 
+	 */
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
 		const folder = button?.parentElement?.parentElement;
@@ -26,14 +31,40 @@ export class TemplatedFolder extends Folder {
 			data: {}
 		};
 
-		JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
-			newEntry.update({
-				content: templateEntry.data.content
-			}).then((arg: any) => {
-				newEntry.sheet.render(true);
-				
+		let title = "New Templated Entry"
+
+		// Render the entity creation form
+		renderTemplate(`templates/sidebar/entity-create.html`, {
+			//@ts-ignore
+			name: data.name || game.i18n.format("ENTITY.New"),
+			folder: data.folder,
+			type: data.type,
+		}).then((html:HTMLElement) => {
+			// Render the confirmation dialog window
+			//@ts-ignore
+			return Dialog.prompt({
+				title: title,
+				content: html,
+				label: title,
+				callback: (html: JQuery<HTMLElement>) => {
+					const form = html[0].querySelector("form");
+					//@ts-ignore
+					const fd = new FormDataExtended(form);
+					data = mergeObject(fd.toObject(), data);
+					JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
+						newEntry.update({
+							content: templateEntry.data.content
+						}).then((arg: any) => {
+							newEntry.sheet.render(true);
+							
+						});
+					})
+				}
 			});
 		})
+	
+
+
 
 	}
 

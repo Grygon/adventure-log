@@ -99,6 +99,10 @@ export class SetupManager {
 
 		customLog(`Converting folder ${folderID}`);
 
+		folder.update({
+			sorting: "m"
+		})
+
 		let data = {
 			name: "Template",
 			type: "Journal",
@@ -106,7 +110,9 @@ export class SetupManager {
 			flags: {templateFolder: folderID},
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
-			data: {}
+			data: {
+				sort: -999999
+			}
 		};
 
 		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
