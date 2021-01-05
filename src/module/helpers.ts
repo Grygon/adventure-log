@@ -39,3 +39,7 @@ export function customLog(text: string, level: ErrorLevels = 0) {
 			break;
 	}
 }
+
+export function loadData() {
+	return game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`);
+}

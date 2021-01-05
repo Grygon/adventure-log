@@ -52,3 +52,8 @@ export class TemplatedFolder extends Folder {
 		return new Promise<string>(() => {return "Custom deleted"});	
 	}
 }
+
+export interface TemplatedFolder extends Folder {
+	testFunc?: Function;
+	isTemplated: boolean;
+}
