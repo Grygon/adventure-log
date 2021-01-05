@@ -19,6 +19,11 @@ On any templated folder, you should see two things:
 * A "stamp" button to create an entry from the template
 
   * You can specify a custom name here, or use the default one of "New Entry"
+  
+  * Note that players need permission to create journal entries to use the stamp
+
+NOTE: All templated folders are visible to players at all times. The content itself is not 
+ Currently, entries are created with just the creating player as owner, so other players won't be able to see entries and the GM will have to manually share them. Permissions configuration is one of the first things on my to-do list!
 
 A demo of v0.1 functionality is here:
 
