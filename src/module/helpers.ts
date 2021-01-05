@@ -17,7 +17,9 @@ export function customLog(text: string, level: ErrorLevels = 0) {
 	const prefix = `${MODULE_NAME} |`;
 	switch (level) {
 		case ErrorLevels["Debug"]:
-			if (game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.debug}`)) {
+			if (
+				game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.debug}`)
+			) {
 				console.log(`${prefix} Debug: ${text}`);
 			}
 			break;
@@ -35,7 +37,7 @@ export function customLog(text: string, level: ErrorLevels = 0) {
 		case ErrorLevels["Critical"]:
 			console.error(`${prefix} Error: ${text}`);
 			ui.notifications.error(`Critical Error! - ${text}`);
-			throw(`${prefix} Error: ${text}`);
+			throw `${prefix} Error: ${text}`;
 			break;
 	}
 }

@@ -1,12 +1,12 @@
 import { customLog } from "./helpers";
-import { MODULE_ID } from './constants';
+import { MODULE_ID } from "./constants";
 
 export class TemplatedFolder extends Folder {
 	// For all templated folder actions
 
 	/**
 	 * On templated button click. For template creation
-	 * @param event 
+	 * @param event
 	 */
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
@@ -15,23 +15,25 @@ export class TemplatedFolder extends Folder {
 		let folderID = folder?.dataset["folderId"];
 
 		let folderEntity = game.folders.get(folderID);
-		let templateID = folderEntity.getFlag(MODULE_ID,"template");
+		let templateID = folderEntity.getFlag(MODULE_ID, "template");
 
 		customLog(`Folder ${folderID} activated with template ${templateID}`);
 
-		let templateEntry = <EntityData<Journal>><unknown>game.journal.get(templateID);
+		let templateEntry = <EntityData<Journal>>(
+			(<unknown>game.journal.get(templateID))
+		);
 
 		let data = {
 			name: "New Entry",
 			type: "Journal",
 			// Future-proofing a bit here
-			flags: {template: templateID},
+			flags: { template: templateID },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
-			data: {}
+			data: {},
 		};
 
-		let title = "New Templated Entry"
+		let title = "New Templated Entry";
 
 		// Render the entity creation form
 		renderTemplate(`templates/sidebar/entity-create.html`, {
@@ -39,7 +41,7 @@ export class TemplatedFolder extends Folder {
 			name: data.name || game.i18n.format("ENTITY.New"),
 			folder: data.folder,
 			type: data.type,
-		}).then((html:HTMLElement) => {
+		}).then((html: HTMLElement) => {
 			// Render the confirmation dialog window
 			//@ts-ignore
 			return Dialog.prompt({
@@ -50,23 +52,22 @@ export class TemplatedFolder extends Folder {
 					const form = html[0].querySelector("form");
 					//@ts-ignore
 					const fd = new FormDataExtended(form);
-					if(!fd["name"]) delete fd["name"];
+					if (!fd["name"]) delete fd["name"];
 					data = mergeObject(data, fd.toObject());
-					JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
-						newEntry.update({
-							content: templateEntry.data.content
-						}).then((arg: any) => {
-							newEntry.sheet.render(true);
-							
-						});
-					})
-				}
+					JournalEntry.create(data).then(
+						(newEntry: Entity<JournalEntry>) => {
+							newEntry
+								.update({
+									content: templateEntry.data.content,
+								})
+								.then((arg: any) => {
+									newEntry.sheet.render(true);
+								});
+						}
+					);
+				},
 			});
-		})
-	
-
-
-
+		});
 	}
 
 	static convert(header: any[]) {
@@ -76,13 +77,18 @@ export class TemplatedFolder extends Folder {
 
 		customLog(`New Templated Folder ${id} created`);
 
-
 		folderEl.addClass("templated-folder");
-
 	}
 
-	delete(options: object | undefined = {deleteSubfolders: false, deleteContents: false}) {
-		return new Promise<string>(() => {return "Custom deleted"});	
+	delete(
+		options: object | undefined = {
+			deleteSubfolders: false,
+			deleteContents: false,
+		}
+	) {
+		return new Promise<string>(() => {
+			return "Custom deleted";
+		});
 	}
 }
 

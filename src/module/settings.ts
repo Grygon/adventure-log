@@ -11,7 +11,7 @@ export const registerSettings = function () {
 		type: Boolean,
 		default: false,
 	});
-	
+
 	// All templated folders and their corresponding templates
 	// This seems to be the best way to store data like this
 	// Stored in format {folderID: templateID}

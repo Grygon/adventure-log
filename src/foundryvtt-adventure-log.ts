@@ -8,8 +8,8 @@
 import { registerSettings } from "./module/settings.js";
 import { preloadTemplates } from "./module/preloadTemplates.js";
 import { MODULE_NAME } from "./module/constants.js";
-import { SetupManager } from './module/setup';
-import { customLog } from './module/helpers';
+import { SetupManager } from "./module/setup";
+import { customLog } from "./module/helpers";
 
 /* ------------------------------------ */
 /* Initialize module					*/
@@ -18,8 +18,11 @@ Hooks.once("init", async function () {
 	console.log(`${MODULE_NAME} | Initializing foundryvtt-adventure-log`);
 
 	// Assign custom classes and constants here
-	if(!game.modules.get('lib-wrapper')?.active && game.user.isGM)
-		customLog("Module Adventure Log requires the 'libWrapper' module. Please install and activate it.",4);
+	if (!game.modules.get("lib-wrapper")?.active && game.user.isGM)
+		customLog(
+			"Module Adventure Log requires the 'libWrapper' module. Please install and activate it.",
+			4
+		);
 
 	// Register custom module settings
 	registerSettings();
@@ -54,6 +57,9 @@ Hooks.once("ready", function () {
 /* ------------------------------------ */
 Hooks.on("getJournalDirectoryFolderContext", SetupManager.setMenu);
 
-Hooks.on('renderJournalDirectory', (app: Application, html: JQuery, data: EntityData) => {
-	SetupManager.onJournalsRendered(app, html, data);
-});
+Hooks.on(
+	"renderJournalDirectory",
+	(app: Application, html: JQuery, data: EntityData) => {
+		SetupManager.onJournalsRendered(app, html, data);
+	}
+);

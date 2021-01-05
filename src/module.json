@@ -1,37 +1,33 @@
 {
-  "name": "adventure-log",
-  "title": "Adventure Log",
-  "description": "For convenient journal templating and player-run logs of your adventure",
-  "version": "0.1.0",
-  "authors": [
-    {
-      "name": "Grygon",
-      "email": "grygohn@gmail.com",
-      "url": "https://www.github.com/grygon/",
-      "discord": "Grygon#9138"
-    }
-  ],
-  "esmodules": [
-    "foundryvtt-adventure-log.js"
-  ],
-  "styles": [
-    "foundryvtt-adventure-log.css"
-  ],
-  "minimumCoreVersion": "0.7.8",
-  "compatibleCoreVersion": "0.7.9",
-  "url": "https://github.com/Grygon/FoundryVTT-Adventure-Log",
-  "manifest": "https://raw.githubusercontent.com/Grygon/FoundryVTT-Adventure-Log/master/module.json",
-  "download": "https://github.com/Grygon/FoundryVTT-Adventure-Log/archive/master.zip",
-  "manifestPlusVersion": "1.0.0",
-  "dependencies": [
-    {
-        "name": "lib-wrapper"
-    }
-  ],
-  "media": [
-    {
-      "type": "icon",
-      "url": "https://raw.githubusercontent.com/Grygon/adventure-log/master/static/icon.png"
-    }
-  ]
+	"name": "adventure-log",
+	"title": "Adventure Log",
+	"description": "For convenient journal templating and player-run logs of your adventure",
+	"version": "0.1.0",
+	"authors": [
+		{
+			"name": "Grygon",
+			"email": "grygohn@gmail.com",
+			"url": "https://www.github.com/grygon/",
+			"discord": "Grygon#9138"
+		}
+	],
+	"esmodules": ["foundryvtt-adventure-log.js"],
+	"styles": ["foundryvtt-adventure-log.css"],
+	"minimumCoreVersion": "0.7.8",
+	"compatibleCoreVersion": "0.7.9",
+	"url": "https://github.com/Grygon/FoundryVTT-Adventure-Log",
+	"manifest": "https://raw.githubusercontent.com/Grygon/FoundryVTT-Adventure-Log/master/module.json",
+	"download": "https://github.com/Grygon/FoundryVTT-Adventure-Log/archive/master.zip",
+	"manifestPlusVersion": "1.0.0",
+	"dependencies": [
+		{
+			"name": "lib-wrapper"
+		}
+	],
+	"media": [
+		{
+			"type": "icon",
+			"url": "https://raw.githubusercontent.com/Grygon/adventure-log/master/static/icon.png"
+		}
+	]
 }
