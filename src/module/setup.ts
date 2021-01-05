@@ -2,6 +2,7 @@ import { TemplatedFolder } from "./templated-folder";
 import { customLog } from "./helpers";
 import { MODULE_ABBREV, MODULE_ID, Settings } from './constants';
 import { template } from "handlebars";
+import { debug } from "../../node_modules/webpack/types";
 
 export class SetupManager {
 	/**
@@ -10,9 +11,9 @@ export class SetupManager {
 	 * @param options 	Options from hook containing all right-click menu items
 	 */
 	static setMenu(html: JQuery, options: any[]) {
-		customLog("Rendering Right Click Menu");
+		customLog("Configuring Right Click Menu");
 		if (!options) {
-			options = [];
+			customLog("Issue adding right click menu--no menu items exist!",4);
 		}
 		options.push({
 			name: "Create Templated Folder",
@@ -22,6 +23,44 @@ export class SetupManager {
 			},
 			callback: (header: JQuery<HTMLElement>) => SetupManager.convertFolder(header),
 		});
+/** 
+		customLog("Configuring folder deletion");
+		let removeOption = options.find((item) => item.name === 'FOLDER.Remove');
+		let deleteOption = options.find((item) => item.name === 'FOLDER.Delete');
+		if(!removeOption) {
+			customLog("Unable to safely bind folder removal. Please report this",3);
+		} else {
+			// We're gonna do what's called a pro gamer move
+			let cached = removeOption.callback
+			
+			let callBack = function(header: JQuery<HTMLElement>, isDelete: boolean) {
+				const li = header.parent();
+				if(li.hasClass("templated-folder")) {
+					const folderID = li.data("folderId");
+
+					let folder = game.folders.get(folderID);
+
+					//@ts-ignore
+					folder.delete = ((options) => {
+						console.log("Foo");
+
+						folder.delete({deleteSubfolders: isDelete, deleteContents: isDelete})
+					})
+	
+					customLog(`Removing templated folder ${folderID}`);
+
+					let newTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`);
+					delete newTemplates[folderID];
+					game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, newTemplates)
+
+					customLog(`Templated folder removed, remaining templates: ${Object.keys(newTemplates).toString()}`);
+				}
+				cached(header);
+			}
+
+			removeOption.callback = callBack;
+		}*/
+
 	}
 
 	static convertFolder(header: JQuery<HTMLElement>) {
@@ -81,7 +120,9 @@ export class SetupManager {
 	) {
 		SetupManager.addTemplateButton(app, html, data);
 		SetupManager.setClasses(html);
+		//SetupManager.bindTemplatedFolder(html);
 	}
+
 
 	/**
 	 * Adds a button to folder to create entry from template
@@ -95,7 +136,10 @@ export class SetupManager {
 		data: EntityData
 	) {
 		// If we can't create entries, exit early
-		if(!game.user.can("JOURNAL_CREATE")) return;
+		if(!game.user.can("JOURNAL_CREATE")) {
+			customLog("User can't create journals"); 
+			return;
+		}
 
 		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
 		let folderIDs = Object.keys(curTemplates);
@@ -145,32 +189,43 @@ export class SetupManager {
 			}
 		}
 	}
+
+	/**
+	 * Function to clean up any folders that may no longer exist from our data
+	 */
+	static cleanupData() {
+		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`);
+
+		for(var folderID in curTemplates) {
+			if(!game.folders.get(folderID)) {
+				delete curTemplates[folderID];
+			}
+		}
+
+		game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates);
+	}
+
+	/**
+	 * 
+	static bindTemplatedFolder(html: JQuery<HTMLElement>) {
+		let curTemplates = game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.templates}`)
+
+		for (var folderID in curTemplates) {
+			let folder: TemplatedFolder = game.folders.get(folderID);
+			if(!folder) {
+				delete curTemplates[folderID];
+			} else {
+				folder.testFunc = function () {
+					customLog("AFASDFASDFASDFASDF");
+					debugger;
+				}
+			}
+		}
+
+
+		game.settings.set(MODULE_ID, `${MODULE_ID}.${Settings.templates}`, curTemplates)
+
+	}
+	 */
 }
-/**
-export function addButton(html: JQuery) {
-	const actionButtons = html.find(".action-buttons");
-
-	const newFolderHtml = `<button class="new-templated-folder">
-			<i class="fas fa-book-reader"></i> New Templated Folder)}
-		</button>`;
-
-	actionButtons.append(newFolderHtml);
-
-	const button = html.find("button.new-templated-folder");
-
-	button.on("click", (event) => {
-		event.preventDefault();
-		event.stopPropagation();
-		const button = event.currentTarget;
-		const parent = button.dataset.parentFolder;
-		const data = {
-			parent: parent ? parent : null,
-			type: "JournalEntry",
-		};
-		//@ts-ignore
-		let folder = Folder.createDialog();
-
-		console.log(folder);
-	});
-} */
 

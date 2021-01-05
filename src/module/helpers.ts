@@ -35,6 +35,7 @@ export function customLog(text: string, level: ErrorLevels = 0) {
 		case ErrorLevels["Critical"]:
 			console.error(`${prefix} Error: ${text}`);
 			ui.notifications.error(`Critical Error! - ${text}`);
+			throw(`${prefix} Error: ${text}`);
 			break;
 	}
 }

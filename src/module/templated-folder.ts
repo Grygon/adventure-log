@@ -1,6 +1,6 @@
 import { customLog } from "./helpers";
 
-export class TemplatedFolder {
+export class TemplatedFolder extends Folder {
 	// For all templated folder actions
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
@@ -28,6 +28,9 @@ export class TemplatedFolder {
 		JournalEntry.create(data).then((newEntry: Entity<JournalEntry>) => {
 			newEntry.update({
 				content: templateEntry.data.content
+			}).then((arg: any) => {
+				newEntry.sheet.render(true);
+				
 			});
 		})
 
@@ -43,5 +46,9 @@ export class TemplatedFolder {
 
 		folderEl.addClass("templated-folder");
 
+	}
+
+	delete(options: object | undefined = {deleteSubfolders: false, deleteContents: false}) {
+		return new Promise<string>(() => {return "Custom deleted"});	
 	}
 }
