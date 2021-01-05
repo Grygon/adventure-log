@@ -1,4 +1,5 @@
 import { customLog } from "./helpers";
+import { MODULE_ID } from './constants';
 
 export class TemplatedFolder extends Folder {
 	// For all templated folder actions
@@ -9,7 +10,7 @@ export class TemplatedFolder extends Folder {
 		let folderID = folder?.dataset["folderId"];
 
 		let folderEntity = game.folders.get(folderID);
-		let templateID = folderEntity.getFlag("adventure-log","template");
+		let templateID = folderEntity.getFlag(MODULE_ID,"template");
 
 		customLog(`Folder ${folderID} activated with template ${templateID}`);
 

@@ -11,7 +11,7 @@ export class SetupManager {
 		libWrapper.register(MODULE_ID, 'Folder.prototype.displayed', function() {
 			// This will be a little expensive, but oh well
 			//@ts-ignore
-			let isTemplated = this._id in loadData();
+			let isTemplated = !!(this.getFlag(MODULE_ID,"template"));
 
 			//@ts-ignore Easier than overriding "this" each time
 			return  game.user.isGM || isTemplated || !!this.content.length || this.children.some(c => c.displayed);
