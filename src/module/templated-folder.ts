@@ -156,6 +156,10 @@ export class TemplatedFolder extends Folder {
 			return "Custom deleted";
 		});
 	}
+
+	static setOptions(folder: TemplatedFolder, options: any) {
+		folder.setFlag(MODULE_ID,"settings",options);
+	}
 }
 
 export interface TemplatedFolder extends Folder {

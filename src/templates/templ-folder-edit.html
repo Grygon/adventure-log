@@ -16,6 +16,20 @@
             <input type="color" value="{{folder.color}}" data-edit="color"/>
         </div>
     </div>
+    
+    <div class="form-group">
+        <label>Test Freetext</label>
+        <div class="form-fields">
+            <input type="text" name="templFolder.test" placeholder="Test" value="{{custom.test}}"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Test 2</label>
+        <div class="form-fields">
+            <input name="templFolder.test2" type="checkbox" data-dtype="Boolean" {{checked custom.test2}}/>
+        </div>
+    </div>
 
     <button type="submit"><i class="fas fa-check"></i> {{submitText}}</button>
 </form>
