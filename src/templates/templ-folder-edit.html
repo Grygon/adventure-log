@@ -1,0 +1,21 @@
+<form id="folder-create" autocomplete="off">
+    <input type="hidden" name="type" value="{{folder.type}}"/>
+    <input type="hidden" name="parent" value="{{folder.parent}}"/>
+
+    <div class="form-group">
+        <label>{{localize "FOLDER.Name"}}</label>
+        <div class="form-fields">
+            <input type="text" name="name" placeholder="Folder Name" value="{{folder.name}}"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{localize "FOLDER.Color"}}</label>
+        <div class="form-fields">
+            <input type="text" name="color" value="{{folder.color}}" data-dtype="String"/>
+            <input type="color" value="{{folder.color}}" data-edit="color"/>
+        </div>
+    </div>
+
+    <button type="submit"><i class="fas fa-check"></i> {{submitText}}</button>
+</form>

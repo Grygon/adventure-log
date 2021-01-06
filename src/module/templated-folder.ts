@@ -11,8 +11,15 @@ export class TemplatedFolder extends Folder {
 	 * Assigns all custom TemplatedFolder properties to the given folder
 	 * @param folder Folder that should be treated as a TemplatedFolder after setup
 	 */
-	static customProperties(folder: Folder) {
-		(<TemplatedFolder>folder).isTemplated = true;
+	static customProperties(folder: TemplatedFolder) {
+		let curTemplates = loadData();
+
+		folder.isTemplated = true;
+
+		folder.template = game.journal.get(curTemplates[folder.id]);
+
+		folder.templateSettings = folder.getFlag(MODULE_ID,"settings");
+
 		customLog(`Custom properties set on folder ${folder.id}`);
 	}
 
@@ -22,24 +29,21 @@ export class TemplatedFolder extends Folder {
 	 */
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
-		const folder = button?.parentElement?.parentElement;
+		const folderEL = button?.parentElement?.parentElement;
 
-		let folderID = folder?.dataset["folderId"];
+		let folderID = folderEL?.dataset["folderId"];
 
-		let folderEntity = game.folders.get(folderID);
-		let templateID = folderEntity.getFlag(MODULE_ID, "template");
+		let folder = <TemplatedFolder>game.folders.get(folderID);
 
-		customLog(`Folder ${folderID} activated with template ${templateID}`);
+		customLog(`Folder ${folder.id} activated with template ${folder.template.id}`);
 
-		let templateEntry = <EntityData<Journal>>(
-			(<unknown>game.journal.get(templateID))
-		);
+		let template = folder.template;
 
 		let data = {
 			name: "New Entry",
 			type: "Journal",
 			// Future-proofing a bit here
-			flags: { template: templateID },
+			flags: { template: template.id },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {},
@@ -70,7 +74,7 @@ export class TemplatedFolder extends Folder {
 						(newEntry: Entity<JournalEntry>) => {
 							newEntry
 								.update({
-									content: templateEntry.data.content,
+									content: (<any>template.data).content,
 								})
 								.then((arg: any) => {
 									newEntry.sheet.render(true);
@@ -157,4 +161,6 @@ export class TemplatedFolder extends Folder {
 export interface TemplatedFolder extends Folder {
 	testFunc?: Function;
 	isTemplated: boolean;
+	template: JournalEntry;
+	templateSettings: any;
 }

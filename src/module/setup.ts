@@ -1,6 +1,7 @@
 import { TemplatedFolder } from "./templated-folder";
 import { customLog, loadData } from "./helpers";
 import { MODULE_ABBREV, MODULE_ID, Settings } from "./constants";
+import { TemplFolderConfig } from "./templ-folder-config";
 
 declare var libWrapper: any;
 
@@ -32,7 +33,7 @@ export class SetupManager {
 		for (var folderID in curTemplates) {
 			let folder = game.folders.get(folderID);
 
-			TemplatedFolder.customProperties(folder);
+			TemplatedFolder.customProperties(<TemplatedFolder>folder);
 		}
 	}
 
@@ -46,6 +47,8 @@ export class SetupManager {
 		if (!options) {
 			customLog("Issue adding right click menu--no menu items exist!", 4);
 		}
+
+		// For non-templated folders
 		options.push({
 			name: "Create Templated Folder",
 			icon: '<i class="fas fa-clipboard-list"></i>',
@@ -55,6 +58,33 @@ export class SetupManager {
 			callback: (header: JQuery<HTMLElement>) =>
 				TemplatedFolder.convertFolder(header),
 		});
+
+		// Edit standard edit to only exist for non-templates
+		options.find((obj: any) => {return (obj.name === "FOLDER.Edit")}).condition = (el: HTMLElement[]) => {
+			return game.user.isGM && !$(el[0]).parent().hasClass("templated-folder");
+		},
+
+		// For templated folders
+		options.unshift({
+			name: "Edit Templated Folder",
+			icon: '<i class="fas fa-edit"></i>',
+			condition: (el: HTMLElement[]) => {
+				return game.user.isGM && $(el[0]).parent().hasClass("templated-folder");
+			},
+			callback: (header: JQuery<HTMLElement>) => {
+			const li = header.parent()[0];
+			let data = li.dataset.folderId;
+			if(!li.dataset.folderId) {
+				customLog("That folder didn't have data!", 3);
+				return;
+			}
+			const folder = game.folders.get(li.dataset.folderId);
+			const options = {top: li.offsetTop, left: window.innerWidth - 310 - <any>FolderConfig.defaultOptions.width};
+			new TemplFolderConfig(folder, options).render(true);
+			}
+		});
+
+	
 	}
 
 	/**
