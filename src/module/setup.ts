@@ -131,11 +131,13 @@ export class SetupManager {
 			folder.addClass("templated-folder");
 
 			let templateButton = folder
+				.children("header")
 				.find("a.create-folder")
 				.after(templateButtonHtml);
 
 			if (templateButton.length === 0) {
 				templateButton = folder
+					.children("header")
 					.find("header")
 					.append(templateButtonHtml);
 			}
