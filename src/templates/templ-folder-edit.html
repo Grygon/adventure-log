@@ -1,4 +1,4 @@
-<form id="folder-create" autocomplete="off">
+<form id="folder-create" class="templ-folder-config" autocomplete="off">
     <input type="hidden" name="type" value="{{folder.type}}"/>
     <input type="hidden" name="parent" value="{{folder.parent}}"/>
 
@@ -18,16 +18,30 @@
     </div>
     
     <div class="form-group">
-        <label>Test Freetext</label>
+        <label>Standard Entry Name</label>
         <div class="form-fields">
-            <input type="text" name="templFolder.test" placeholder="Test" value="{{custom.test}}"/>
+            <input type="text" name="templFolder.newEntryName" value="{{templFolder.newEntryName}}"/>
         </div>
     </div>
 
     <div class="form-group">
-        <label>Test 2</label>
+        <label>Show Folder to All</label>
         <div class="form-fields">
-            <input name="templFolder.test2" type="checkbox" data-dtype="Boolean" {{checked custom.test2}}/>
+            <input name="templFolder.showToPlayers" type="checkbox" data-dtype="Boolean" {{checked templFolder.showToPlayers}}/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Entry Permissions</label>
+        <div class="form-fields">
+            <select name="templFolder.newPerms" data-type="Number">
+                {{#select templFolder.newPerms}}
+                <option value="0">None</option>
+                <option value="1">Limited</option>
+                <option value="2">Observer</option>
+                <option value="3">Owner</option>
+                {{/select}}
+            </select>
         </div>
     </div>
 

@@ -6,7 +6,6 @@ import { MODULE_ID, Settings } from "./constants";
  * Currently we aren't using the extension, but perhaps in the future
  */
 export class TemplatedFolder extends Folder {
-
 	/**
 	 * Assigns all custom TemplatedFolder properties to the given folder
 	 * @param folder Folder that should be treated as a TemplatedFolder after setup
@@ -18,7 +17,7 @@ export class TemplatedFolder extends Folder {
 
 		folder.template = game.journal.get(curTemplates[folder.id]);
 
-		folder.templateSettings = folder.getFlag(MODULE_ID,"settings");
+		folder.templateSettings = folder.getFlag(MODULE_ID, "settings");
 
 		customLog(`Custom properties set on folder ${folder.id}`);
 	}
@@ -35,18 +34,21 @@ export class TemplatedFolder extends Folder {
 
 		let folder = <TemplatedFolder>game.folders.get(folderID);
 
-		customLog(`Folder ${folder.id} activated with template ${folder.template.id}`);
+		customLog(
+			`Folder ${folder.id} activated with template ${folder.template.id}`
+		);
 
 		let template = folder.template;
 
 		let data = {
-			name: "New Entry",
+			name: folder.templateSettings.newEntryName,
 			type: "Journal",
 			// Future-proofing a bit here
 			flags: { template: template.id },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {},
+			permission: { default: Number(folder.templateSettings.newPerms) },
 		};
 
 		let title = "New Templated Entry";
@@ -67,7 +69,7 @@ export class TemplatedFolder extends Folder {
 				callback: (html: JQuery<HTMLElement>) => {
 					const form = html[0].querySelector("form");
 					//@ts-ignore
-					const fd = (new FormDataExtended(form)).toObject();
+					const fd = new FormDataExtended(form).toObject();
 					if (!fd["name"]) delete fd["name"];
 					data = mergeObject(data, fd);
 					JournalEntry.create(data).then(
@@ -90,7 +92,7 @@ export class TemplatedFolder extends Folder {
 	 * Given a folder's header, perform all necessary setup to convert it to a templated folder
 	 * @param header Standard HTML header for the folder
 	 */
-	static convertFolder(header: JQuery<HTMLElement>) {
+	static async convertFolder(header: JQuery<HTMLElement>) {
 		let folderID = header.parent()[0].dataset["folderId"];
 		if (!folderID) {
 			customLog("Error converting folder--ID does not exist", 2);
@@ -117,32 +119,36 @@ export class TemplatedFolder extends Folder {
 			},
 		};
 
-		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
-			// Guess we have to check this again here or TS will complain. Oh well.
-			if (!folderID) {
-				customLog("Error converting folder--ID does not exist", 2);
-				return;
-			}
+		let template = await JournalEntry.create(data);
 
-			let templateID = template.id;
+		let templateID = template.id;
 
-			customLog(`Template ${templateID} created for folder ${folderID}`);
-			template.sheet.render(true);
+		customLog(`Template ${templateID} created for folder ${folderID}`);
+		template.sheet.render(true);
 
-			// Current templates object
-			let curTemplates = loadData();
-			curTemplates[folderID] = templateID;
-			game.settings.set(
-				MODULE_ID,
-				`${MODULE_ID}.${Settings.templates}`,
-				curTemplates
-			);
+		// Current templates object
+		let curTemplates = loadData();
+		curTemplates[folderID] = templateID;
+		await game.settings.set(
+			MODULE_ID,
+			`${MODULE_ID}.${Settings.templates}`,
+			curTemplates
+		);
 
-			// Going to register this directly on the folder
-			folder.setFlag("adventure-log", "template", templateID);
+		// Set default options
+		let defaultSettings: TemplateSettings = {
+			newEntryName: "New Entry",
+			// Oberver permissions by default
+			newPerms: 2,
+		};
 
-			customLog(`Template registered to folder`);
-		});
+		await TemplatedFolder.setOptions(
+			<TemplatedFolder>folder,
+			defaultSettings
+		);
+		TemplatedFolder.customProperties(<TemplatedFolder>folder);
+
+		customLog(`Template registered to folder`);
 	}
 
 	// TODO: Delete templated folders properly
@@ -157,8 +163,13 @@ export class TemplatedFolder extends Folder {
 		});
 	}
 
-	static setOptions(folder: TemplatedFolder, options: any) {
-		folder.setFlag(MODULE_ID,"settings",options);
+	static async setOptions(
+		folder: TemplatedFolder,
+		settings: TemplateSettings
+	) {
+		await folder.setFlag(MODULE_ID, "settings", settings);
+		folder.templateSettings = settings;
+		customLog(`Folder ${folder.id} settings data updated`);
 	}
 }
 
@@ -166,5 +177,10 @@ export interface TemplatedFolder extends Folder {
 	testFunc?: Function;
 	isTemplated: boolean;
 	template: JournalEntry;
-	templateSettings: any;
+	templateSettings: TemplateSettings;
+}
+
+export interface TemplateSettings {
+	newEntryName: string;
+	newPerms: number;
 }

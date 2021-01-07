@@ -1,18 +1,17 @@
 import { TemplatedFolder } from "./templated-folder";
-import { MODULE_ID } from './constants';
-import { unFlatten, customLog } from './helpers';
+import { MODULE_ID } from "./constants";
+import { unFlatten, customLog } from "./helpers";
 
 /**
  * Edit a folder, configuring its name and appearance
  * @extends {FormApplication}
  */
 export class TemplFolderConfig extends FormApplication {
-
 	/** @override */
 	static get defaultOptions() {
 		return mergeObject(super.defaultOptions, {
 			classes: ["sheet", "folder-edit"],
-			template: "modules/adventure-log/templates/templ-folder-edit.html",
+      template: "modules/adventure-log/templates/templ-folder-edit.html",
 			width: 360,
 		});
 	}
@@ -41,9 +40,10 @@ export class TemplFolderConfig extends FormApplication {
 
 	/** @override */
 	async getData(options: any) {
+		customLog(`Editing configuration for folder ${this.object.id}`);
 		return {
 			folder: this.object.data,
-			custom: this.object.templateSettings,
+			templFolder: this.object.templateSettings,
 			sortingModes: {
 				a: "FOLDER.SortAlphabetical",
 				m: "FOLDER.SortManual",
@@ -58,6 +58,7 @@ export class TemplFolderConfig extends FormApplication {
 
 	/** @override */
 	async _updateObject(event: Event, formData: any) {
+		customLog(`Settings for folder ${this.object.id} updated`);
 		if (!formData.parent) formData.parent = null;
 		if (!this.object._id)
 			return Folder.create(mergeObject(this.object.data, formData));
@@ -65,12 +66,11 @@ export class TemplFolderConfig extends FormApplication {
 		return this.object.update(formData);
 	}
 
-	storeCustom(formData: any) { 
-    let unFlattened = unFlatten(formData);
+	storeCustom(formData: any) {
+		let unFlattened = unFlatten(formData);
 
-    TemplatedFolder.setOptions(this.object, unFlattened.templFolder);
-    TemplatedFolder.customProperties(this.object);
-  }
+		TemplatedFolder.setOptions(this.object, unFlattened.templFolder);
+	}
 }
 
 export interface TemplFolderConfig extends FormApplication {
