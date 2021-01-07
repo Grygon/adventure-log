@@ -1,4 +1,4 @@
-import { TemplatedFolder } from "./templated-folder";
+import { TemplatedFolder, TemplateSettings } from './templated-folder';
 import { customLog, loadData } from './helpers';
 import { MODULE_ABBREV, MODULE_ID, Settings } from "./constants";
 import { TemplFolderConfig } from "./templ-folder-config";
@@ -7,6 +7,8 @@ declare var libWrapper: any;
 
 export class SetupManager {
 	 static async migrate() {
+		if(!game.user.isGM) return;
+
 		let curVer = Number(game.modules.get(MODULE_ID).data.version.split(".").slice(0,2).join("."));
 		let migVer = game.settings.get(
 			MODULE_ID,
@@ -27,7 +29,7 @@ export class SetupManager {
 			let normJournals = journals.filter(j => j.data.flags.template);
 
 			templates.forEach(async function(journal) {await journal.setFlag(MODULE_ID,"templateFolder",journal.data.flags.templateFolder)});
-			templates.forEach(async function(journal) {await journal.setFlag(MODULE_ID,"template",journal.data.flags.template)});
+			normJournals.forEach(async function(journal) {await journal.setFlag(MODULE_ID,"template",journal.data.flags.template)});
 
 
 		}
@@ -40,14 +42,22 @@ export class SetupManager {
 			MODULE_ID,
 			"Folder.prototype.displayed",
 			function () {
+				//@ts-ignore
+				let settings = this.getFlag(MODULE_ID,'settings')
+
+				let alwaysShow = false;
+
+				if(settings) {
+					alwaysShow = settings.showToPlayers;
+				}
+
 				return (
 					game.user.isGM ||
 					//@ts-ignore Just taking this from the standard function
 					!!this.content.length ||
 					//@ts-ignore Just taking this from the standard function
 					this.children.some((c) => c.displayed) ||
-					//@ts-ignore
-					!!this.getFlag(MODULE_ID, "template")
+					alwaysShow
 				);
 			},
 			"OVERRIDE"
