@@ -43,8 +43,6 @@ export class TemplatedFolder extends Folder {
 		let data = {
 			name: folder.templateSettings.newEntryName,
 			type: "Journal",
-			// Future-proofing a bit here
-			flags: { template: template.id },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {},
@@ -79,6 +77,8 @@ export class TemplatedFolder extends Folder {
 									content: (<any>template.data).content,
 								})
 								.then((arg: any) => {
+									// Future-proofing a bit here
+									newEntry.setFlag(MODULE_ID,"template",template.id);
 									newEntry.sheet.render(true);
 								});
 						}
@@ -110,8 +110,6 @@ export class TemplatedFolder extends Folder {
 		let data = {
 			name: "Template",
 			type: "Journal",
-			// Future-proofing a bit here
-			flags: { templateFolder: folderID },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {
@@ -124,6 +122,8 @@ export class TemplatedFolder extends Folder {
 		let templateID = template.id;
 
 		customLog(`Template ${templateID} created for folder ${folderID}`);
+		// Future-proofing a bit here
+		await template.setFlag(MODULE_ID,"templateFolder",folderID)
 		template.sheet.render(true);
 
 		// Current templates object

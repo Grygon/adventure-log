@@ -44,6 +44,7 @@ Hooks.once("setup", function () {
 /* ------------------------------------ */
 Hooks.once("ready", function () {
 	// Do anything once the module is ready
+	SetupManager.migrate();
 
 	// Clean up our stored data, removing folders that no longer exist
 	SetupManager.cleanupData();

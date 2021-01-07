@@ -22,4 +22,13 @@ export const registerSettings = function () {
 		type: Object,
 		default: {},
 	});
+
+	// To track migrations
+	game.settings.register(MODULE_ID, `${MODULE_ID}.${Settings.migration}`, {
+		name: "Migration Version",
+		scope: "world",
+		config: false,
+		type: Number,
+		default: -1,
+	});
 };
