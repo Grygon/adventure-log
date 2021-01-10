@@ -20,7 +20,7 @@ export function customLog(text: string, level: ErrorLevels = 0) {
 			if (
 				game.settings.get(MODULE_ID, `${MODULE_ID}.${Settings.debug}`)
 			) {
-				console.log(`${prefix} Debug: ${text}`);
+				console.debug(`${prefix} Debug: ${text}`);
 			}
 			break;
 		case ErrorLevels["Low"]:

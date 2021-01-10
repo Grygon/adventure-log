@@ -7,22 +7,6 @@ import { MODULE_ID, Settings } from "./constants";
  */
 export class TemplatedFolder extends Folder {
 	/**
-	 * Assigns all custom TemplatedFolder properties to the given folder
-	 * @param folder Folder that should be treated as a TemplatedFolder after setup
-	 */
-	static customProperties(folder: TemplatedFolder) {
-		let curTemplates = loadData();
-
-		folder.isTemplated = true;
-
-		folder.template = game.journal.get(curTemplates[folder.id]);
-
-		folder.templateSettings = folder.getFlag(MODULE_ID, "settings");
-
-		customLog(`Custom properties set on folder ${folder.id}`);
-	}
-
-	/**
 	 * On templated button click. For template creation
 	 * @param event	ClickEvent for the stamp button
 	 */
@@ -78,7 +62,11 @@ export class TemplatedFolder extends Folder {
 								})
 								.then((arg: any) => {
 									// Future-proofing a bit here
-									newEntry.setFlag(MODULE_ID,"template",template.id);
+									newEntry.setFlag(
+										MODULE_ID,
+										"template",
+										template.id
+									);
 									newEntry.sheet.render(true);
 								});
 						}
@@ -123,7 +111,7 @@ export class TemplatedFolder extends Folder {
 
 		customLog(`Template ${templateID} created for folder ${folderID}`);
 		// Future-proofing a bit here
-		await template.setFlag(MODULE_ID,"templateFolder",folderID)
+		await template.setFlag(MODULE_ID, "templateFolder", folderID);
 		template.sheet.render(true);
 
 		// Current templates object
@@ -140,36 +128,44 @@ export class TemplatedFolder extends Folder {
 			newEntryName: "New Entry",
 			// Oberver permissions by default
 			newPerms: 2,
+			playerCreation: true,
 		};
 
-		await TemplatedFolder.setOptions(
-			<TemplatedFolder>folder,
-			defaultSettings
-		);
-		TemplatedFolder.customProperties(<TemplatedFolder>folder);
+		let tFolder = new TemplatedFolder(folder);
+
+		await tFolder.setOptions(defaultSettings);
 
 		customLog(`Template registered to folder`);
 	}
 
-	// TODO: Delete templated folders properly
-	delete(
-		options: object | undefined = {
-			deleteSubfolders: false,
-			deleteContents: false,
-		}
-	) {
-		return new Promise<string>(() => {
-			return "Custom deleted";
-		});
+	constructor(folder: Folder) {
+		super(folder.data, {});
+		let curTemplates = loadData();
+
+		this.template = game.journal.get(curTemplates[folder.id]);
+
+		game.folders.set(this.id, this);
 	}
 
-	static async setOptions(
-		folder: TemplatedFolder,
-		settings: TemplateSettings
-	) {
-		await folder.setFlag(MODULE_ID, "settings", settings);
-		folder.templateSettings = settings;
-		customLog(`Folder ${folder.id} settings data updated`);
+	/**
+	 * Assigns all custom TemplatedFolder properties to the given folder
+	 * @param folder Folder that should be treated as a TemplatedFolder after setup
+	 */
+	static customProperties(folder: TemplatedFolder) {
+		customLog(`Custom properties set on folder ${folder.id}`);
+	}
+
+	isTemplated = true;
+
+	template: JournalEntry;
+
+	get templateSettings() {
+		return <TemplateSettings>this.getFlag(MODULE_ID, "settings");
+	}
+
+	async setOptions(settings: TemplateSettings) {
+		await this.setFlag(MODULE_ID, "settings", settings);
+		customLog(`Folder ${this.id} settings data updated`);
 	}
 }
 
@@ -183,4 +179,5 @@ export interface TemplatedFolder extends Folder {
 export interface TemplateSettings {
 	newEntryName: string;
 	newPerms: number;
+	playerCreation: boolean;
 }

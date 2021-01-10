@@ -70,7 +70,7 @@ export class TemplFolderConfig extends FormApplication {
 	storeCustom(formData: any) {
 		let unFlattened = unFlatten(formData);
 
-		TemplatedFolder.setOptions(this.object, unFlattened.templFolder);
+		this.object.setOptions(unFlattened.templFolder);
 	}
 
 	

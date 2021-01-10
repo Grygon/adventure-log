@@ -62,6 +62,7 @@ export class SetupManager {
 
 	static overrideFuncs() {
 		// For Folders
+		// Need to put this here because by the time we start registering Templated Folders it's too late
 		libWrapper.register(
 			MODULE_ID,
 			"Folder.prototype.displayed",
@@ -72,7 +73,7 @@ export class SetupManager {
 				let alwaysShow = false;
 
 				if (settings) {
-					alwaysShow = settings.showToPlayers;
+					alwaysShow = settings.playerCreation;
 				}
 
 				return (
@@ -103,13 +104,13 @@ export class SetupManager {
 		);
 	}
 
-	static customProperties() {
+	static createTemplates() {
 		let curTemplates = loadData();
 
 		for (var folderID in curTemplates) {
 			let folder = game.folders.get(folderID);
 
-			TemplatedFolder.customProperties(<TemplatedFolder>folder);
+			let template = new TemplatedFolder(folder);
 		}
 	}
 
@@ -215,6 +216,13 @@ export class SetupManager {
 		let folders = [];
 		let folder: JQuery;
 		for (let i = 0; i < folderIDs.length; i++) {
+			let folderObj = <TemplatedFolder | Folder>(
+				game.folders.get(folderIDs[i])
+			);
+			if (!(folderObj instanceof TemplatedFolder)) continue;
+			if (!folderObj.templateSettings.playerCreation && !game.user.isGM)
+				continue;
+
 			folder = $(html).find(`li[data-folder-id="${folderIDs[i]}"]`);
 			folder.addClass("templated-folder");
 
@@ -226,7 +234,6 @@ export class SetupManager {
 			if (templateButton.length === 0) {
 				templateButton = folder
 					.children("header")
-					.find("header")
 					.append(templateButtonHtml);
 			}
 

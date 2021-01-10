@@ -48,7 +48,7 @@ Hooks.once("ready", function () {
 
 	// Clean up our stored data, removing folders that no longer exist
 	SetupManager.cleanupData();
-	SetupManager.customProperties();
+	SetupManager.createTemplates();
 });
 
 /* ------------------------------------ */
