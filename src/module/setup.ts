@@ -1,15 +1,21 @@
-import { TemplatedFolder, TemplateSettings } from './templated-folder';
-import { customLog, loadData } from './helpers';
+import { TemplatedFolder, TemplateSettings } from "./templated-folder";
+import { customLog, loadData } from "./helpers";
 import { MODULE_ABBREV, MODULE_ID, Settings } from "./constants";
 import { TemplFolderConfig } from "./templ-folder-config";
 
 declare var libWrapper: any;
 
 export class SetupManager {
-	 static async migrate() {
-		if(!game.user.isGM) return;
+	static async migrate() {
+		if (!game.user.isGM) return;
 
-		let curVer = Number(game.modules.get(MODULE_ID).data.version.split(".").slice(0,2).join("."));
+		let curVer = Number(
+			game.modules
+				.get(MODULE_ID)
+				.data.version.split(".")
+				.slice(0, 2)
+				.join(".")
+		);
 		let migVer = game.settings.get(
 			MODULE_ID,
 			`${MODULE_ID}.${Settings.migration}`
@@ -17,23 +23,41 @@ export class SetupManager {
 
 		customLog(`Current version is ${curVer}, last migrated on ${migVer}`);
 
-		if(curVer === migVer) return;
-		if(migVer === -1) {
-			game.settings.set(MODULE_ID,`${MODULE_ID}.${Settings.migration}`,curVer);
+		if (curVer === migVer) return;
+		if (migVer === -1) {
+			game.settings.set(
+				MODULE_ID,
+				`${MODULE_ID}.${Settings.migration}`,
+				curVer
+			);
 			return;
 		}
-		if(migVer <= 0.1) {
-			let journals = <Array<JournalEntry>><any>game.journal.entries;
+		if (migVer <= 0.1) {
+			let journals = <Array<JournalEntry>>(<any>game.journal.entries);
 
-			let templates = journals.filter(j => j.data.flags.templateFolder);
-			let normJournals = journals.filter(j => j.data.flags.template);
+			let templates = journals.filter((j) => j.data.flags.templateFolder);
+			let normJournals = journals.filter((j) => j.data.flags.template);
 
-			templates.forEach(async function(journal) {await journal.setFlag(MODULE_ID,"templateFolder",journal.data.flags.templateFolder)});
-			normJournals.forEach(async function(journal) {await journal.setFlag(MODULE_ID,"template",journal.data.flags.template)});
-
-
+			templates.forEach(async function (journal) {
+				await journal.setFlag(
+					MODULE_ID,
+					"templateFolder",
+					journal.data.flags.templateFolder
+				);
+			});
+			normJournals.forEach(async function (journal) {
+				await journal.setFlag(
+					MODULE_ID,
+					"template",
+					journal.data.flags.template
+				);
+			});
 		}
-		game.settings.set(MODULE_ID,`${MODULE_ID}.${Settings.migration}`,curVer);
+		game.settings.set(
+			MODULE_ID,
+			`${MODULE_ID}.${Settings.migration}`,
+			curVer
+		);
 	}
 
 	static overrideFuncs() {
@@ -43,11 +67,11 @@ export class SetupManager {
 			"Folder.prototype.displayed",
 			function () {
 				//@ts-ignore
-				let settings = this.getFlag(MODULE_ID,'settings')
+				let settings = this.getFlag(MODULE_ID, "settings");
 
 				let alwaysShow = false;
 
-				if(settings) {
+				if (settings) {
 					alwaysShow = settings.showToPlayers;
 				}
 
@@ -112,42 +136,43 @@ export class SetupManager {
 		});
 
 		// Edit standard edit to only exist for non-templates
-		(options.find((obj: any) => {
+		options.find((obj: any) => {
 			return obj.name === "FOLDER.Edit";
 		}).condition = (el: HTMLElement[]) => {
 			return (
 				game.user.isGM &&
 				!$(el[0]).parent().hasClass("templated-folder")
 			);
-		}),
-			// For templated folders
-			options.unshift({
-				name: "Edit Templated Folder",
-				icon: '<i class="fas fa-edit"></i>',
-				condition: (el: HTMLElement[]) => {
-					return (
-						game.user.isGM &&
-						$(el[0]).parent().hasClass("templated-folder")
-					);
-				},
-				callback: (header: JQuery<HTMLElement>) => {
-					const li = header.parent()[0];
-					let data = li.dataset.folderId;
-					if (!li.dataset.folderId) {
-						customLog("That folder didn't have data!", 3);
-						return;
-					}
-					const folder = game.folders.get(li.dataset.folderId);
-					const options = {
-						top: li.offsetTop,
-						left:
-							window.innerWidth -
-							310 -
-							<any>FolderConfig.defaultOptions.width,
-					};
-					new TemplFolderConfig(folder, options).render(true);
-				},
-			});
+		};
+
+		// For templated folders
+		options.unshift({
+			name: "Edit Templated Folder",
+			icon: '<i class="fas fa-edit"></i>',
+			condition: (el: HTMLElement[]) => {
+				return (
+					game.user.isGM &&
+					$(el[0]).parent().hasClass("templated-folder")
+				);
+			},
+			callback: (header: JQuery<HTMLElement>) => {
+				const li = header.parent()[0];
+				let data = li.dataset.folderId;
+				if (!li.dataset.folderId) {
+					customLog("That folder didn't have data!", 3);
+					return;
+				}
+				const folder = game.folders.get(li.dataset.folderId);
+				const options = {
+					top: li.offsetTop,
+					left:
+						window.innerWidth -
+						310 -
+						<any>FolderConfig.defaultOptions.width,
+				};
+				new TemplFolderConfig(folder, options).render(true);
+			},
+		});
 	}
 
 	/**

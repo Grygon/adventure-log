@@ -1,6 +1,7 @@
 import { TemplatedFolder } from "./templated-folder";
 import { MODULE_ID } from "./constants";
 import { unFlatten, customLog } from "./helpers";
+import { Template } from "handlebars";
 
 /**
  * Edit a folder, configuring its name and appearance
@@ -11,7 +12,7 @@ export class TemplFolderConfig extends FormApplication {
 	static get defaultOptions() {
 		return mergeObject(super.defaultOptions, {
 			classes: ["sheet", "folder-edit"],
-      template: "modules/adventure-log/templates/templ-folder-edit.html",
+			template: "modules/adventure-log/templates/templ-folder-edit.html",
 			width: 360,
 		});
 	}
@@ -70,6 +71,18 @@ export class TemplFolderConfig extends FormApplication {
 		let unFlattened = unFlatten(formData);
 
 		TemplatedFolder.setOptions(this.object, unFlattened.templFolder);
+	}
+
+	
+	/** @override */
+	activateListeners(html: JQuery) {
+		super.activateListeners(html);
+
+		// Set button to open template
+		html.find(".edit-template").on("click", (event) => {
+			this.submit({});
+			(<TemplatedFolder>this.object).template.sheet.render(true);
+		});
 	}
 }
 
