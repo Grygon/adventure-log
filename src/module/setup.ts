@@ -133,7 +133,7 @@ export class SetupManager {
 				return !$(el[0]).parent().hasClass("templated-folder");
 			},
 			callback: (header: JQuery<HTMLElement>) =>
-				TemplatedFolder.convertFolder(header),
+				TemplatedFolder.convertFromButton(header),
 		});
 
 		// Edit standard edit to only exist for non-templates
@@ -248,6 +248,36 @@ export class SetupManager {
 			event.stopPropagation();
 
 			TemplatedFolder.buttonClick(event);
+		});
+	}
+
+	/**
+	 * Adds a button to top of the sidebar to create a new tFolder
+	 * @param html Page HTML to add to
+	 */
+	static addNewFolderButton(html: JQuery) {
+		const actionButtons = html.find(".action-buttons");
+
+		const newFolderHtml = `<button class="new-templated-folder">
+				<i class="fas fa-book-reader"></i> New Templated Folder)}
+			</button>`;
+
+		actionButtons.append(newFolderHtml);
+
+		const button = html.find("button.new-templated-folder");
+
+		button.on("click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			const button = event.currentTarget;
+			const parent = button.dataset.parentFolder;
+			const data = {
+				parent: parent ? parent : null,
+				type: "JournalEntry",
+			};
+			let folder = TemplatedFolder._onCreateTemplatedFolder(<MouseEvent><any>event);
+
+			console.log(folder);
 		});
 	}
 

@@ -53,6 +53,8 @@
         </div>
     </div>
 
+    {{#if editing}}
     <a class="edit-template" data-template="{{templFolder.template}}"><i class="fas fa-edit"></i>Edit Template</a>
+    {{/if}}
     <button type="submit"><i class="fas fa-check"></i> {{submitText}}</button>
 </form>

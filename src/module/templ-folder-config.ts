@@ -1,7 +1,6 @@
 import { TemplatedFolder } from "./templated-folder";
 import { MODULE_ID } from "./constants";
 import { unFlatten, customLog } from "./helpers";
-import { Template } from "handlebars";
 
 /**
  * Edit a folder, configuring its name and appearance
@@ -52,6 +51,7 @@ export class TemplFolderConfig extends FormApplication {
 			submitText: game.i18n.localize(
 				this.object._id ? "FOLDER.Update" : "FOLDER.Create"
 			),
+			editing: !(this.options.creating),
 		};
 	}
 
@@ -61,10 +61,21 @@ export class TemplFolderConfig extends FormApplication {
 	async _updateObject(event: Event, formData: any) {
 		customLog(`Settings for folder ${this.object.id} updated`);
 		if (!formData.parent) formData.parent = null;
-		if (!this.object._id)
-			return Folder.create(mergeObject(this.object.data, formData));
-		this.storeCustom(formData);
-		return this.object.update(formData);
+		let folder: Folder;
+		let created = false;
+		if (this.options.creating){
+			folder = await Folder.create(mergeObject(this.object.data, formData))
+		} else {
+			this.storeCustom(formData);
+		}
+		this.object.update(formData);
+		if(this.options.creating) {
+			debugger;
+			//@ts-ignore Clunky but w/e
+			this.object = await TemplatedFolder.convertFolder(folder);
+			this.storeCustom(formData);
+		}
+
 	}
 
 	storeCustom(formData: any) {

@@ -60,5 +60,6 @@ Hooks.on(
 	"renderJournalDirectory",
 	(app: Application, html: JQuery, data: EntityData) => {
 		SetupManager.onJournalsRendered(app, html, data);
+		SetupManager.addNewFolderButton(html);
 	}
 );
