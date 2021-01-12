@@ -2,7 +2,7 @@
 	"name": "adventure-log",
 	"title": "Adventure Log",
 	"description": "For convenient journal templating and player-run logs of your adventure",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"authors": [
 		{
 			"name": "Grygon",
@@ -21,7 +21,7 @@
 	"compatibleCoreVersion": "0.7.9",
 	"url": "https://github.com/Grygon/adventure-log",
 	"manifest": "https://raw.githubusercontent.com/Grygon/adventure-log/master/src/module.json",
-	"download": "https://raw.githubusercontent.com/Grygon/adventure-log/v0.1.0/package/adventure-log-v0.1.0.zip",
+	"download": "https://raw.githubusercontent.com/Grygon/adventure-log/v0.2.0/package/adventure-log-v0.2.0.zip",
 	"manifestPlusVersion": "1.0.0",
 	"dependencies": [
 		{"name": "lib-wrapper"}
