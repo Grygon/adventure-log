@@ -259,7 +259,7 @@ export class SetupManager {
 		const actionButtons = html.find(".action-buttons");
 
 		const newFolderHtml = `<button class="new-templated-folder">
-				<i class="fas fa-book-reader"></i> New Templated Folder)}
+				<i class="fas fa-book-reader"></i> New Templated Folder
 			</button>`;
 
 		actionButtons.append(newFolderHtml);

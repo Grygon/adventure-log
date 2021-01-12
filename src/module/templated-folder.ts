@@ -183,7 +183,11 @@ export class TemplatedFolder extends Folder {
 	}
 
 	async setOptions(settings: TemplateSettings) {
-		await this.setFlag(MODULE_ID, "settings", settings);
+		let curSettings = {};
+		if(this.templateSettings) {
+			curSettings = this.templateSettings;
+		}
+		await this.setFlag(MODULE_ID, "settings", mergeObject(curSettings,settings));
 		customLog(`Folder ${this.id} settings data updated`);
 	}
 
@@ -209,7 +213,7 @@ export class TemplatedFolder extends Folder {
 }
 
 // Set default options
-let defaultSettings: TemplateSettings = {
+export let defaultSettings: TemplateSettings = {
 	newEntryName: "New Entry",
 	// Oberver permissions by default
 	newPerms: 2,

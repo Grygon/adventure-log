@@ -1,4 +1,4 @@
-import { TemplatedFolder } from "./templated-folder";
+import { TemplatedFolder, defaultSettings } from "./templated-folder";
 import { MODULE_ID } from "./constants";
 import { unFlatten, customLog } from "./helpers";
 
@@ -41,9 +41,11 @@ export class TemplFolderConfig extends FormApplication {
 	/** @override */
 	async getData(options: any) {
 		customLog(`Editing configuration for folder ${this.object.id}`);
+		let templateSettings = this.object.templateSettings
+		if(!templateSettings) templateSettings = defaultSettings;
 		return {
 			folder: this.object.data,
-			templFolder: this.object.templateSettings,
+			templFolder: templateSettings,
 			sortingModes: {
 				a: "FOLDER.SortAlphabetical",
 				m: "FOLDER.SortManual",
@@ -61,6 +63,8 @@ export class TemplFolderConfig extends FormApplication {
 	async _updateObject(event: Event, formData: any) {
 		customLog(`Settings for folder ${this.object.id} updated`);
 		if (!formData.parent) formData.parent = null;
+		if (!formData["templFolder.newEntryName"]) formData["templFolder.newEntryName"] = defaultSettings.newEntryName;
+
 		let folder: Folder;
 		let created = false;
 		if (this.options.creating){
@@ -70,7 +74,6 @@ export class TemplFolderConfig extends FormApplication {
 		}
 		this.object.update(formData);
 		if(this.options.creating) {
-			debugger;
 			//@ts-ignore Clunky but w/e
 			this.object = await TemplatedFolder.convertFolder(folder);
 			this.storeCustom(formData);
