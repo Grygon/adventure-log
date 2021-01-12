@@ -1,0 +1,60 @@
+<form id="folder-create" class="templ-folder-config" autocomplete="off">
+    <input type="hidden" name="type" value="{{folder.type}}"/>
+    <input type="hidden" name="parent" value="{{folder.parent}}"/>
+
+    <div class="form-group">
+        <label>{{localize "FOLDER.Name"}}</label>
+        <div class="form-fields">
+            <input type="text" name="name" placeholder="Folder Name" value="{{folder.name}}"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>{{localize "FOLDER.Color"}}</label>
+        <div class="form-fields">
+            <input type="text" name="color" value="{{folder.color}}" data-dtype="String"/>
+            <input type="color" value="{{folder.color}}" data-edit="color"/>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Sorting Mode</label>
+        <div class="form-fields">
+            {{radioBoxes "sorting" sortingModes checked=folder.sorting localize=true}}
+        </div>
+    </div>  
+
+    <div class="form-group">
+        <label>Standard Entry Name</label>
+        <div class="form-fields">
+            <input type="text" name="templFolder.newEntryName" placeholder="New Entry" value="{{templFolder.newEntryName}}"/>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label>Entry Permissions</label>
+        <div class="form-fields">
+            <select name="templFolder.newPerms" data-type="Number">
+                {{#select templFolder.newPerms}}
+                <option value="0">None</option>
+                <option value="1">Limited</option>
+                <option value="2">Observer</option>
+                <option value="3">Owner</option>
+                {{/select}}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Allow Player Creation</label>
+        <div class="form-fields">
+            <input name="templFolder.playerCreation" type="checkbox" data-dtype="Boolean" {{checked templFolder.playerCreation}}/>
+        </div>
+    </div>
+
+    {{#if editing}}
+    <a class="edit-template" data-template="{{templFolder.template}}"><i class="fas fa-edit"></i>Edit Template</a>
+    {{/if}}
+    <button type="submit"><i class="fas fa-check"></i> {{submitText}}</button>
+</form>

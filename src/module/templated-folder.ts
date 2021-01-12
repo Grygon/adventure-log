@@ -1,48 +1,36 @@
 import { customLog, loadData } from "./helpers";
 import { MODULE_ID, Settings } from "./constants";
+import { TemplFolderConfig } from "./templ-folder-config";
 
 /**
- * Pseudo-class for use on all templated folder actions
- * Currently we aren't using the extension, but perhaps in the future
+ * An instance of a folder with template information set.
  */
 export class TemplatedFolder extends Folder {
-
-	/**
-	 * Assigns all custom TemplatedFolder properties to the given folder
-	 * @param folder Folder that should be treated as a TemplatedFolder after setup
-	 */
-	static customProperties(folder: Folder) {
-		(<TemplatedFolder>folder).isTemplated = true;
-		customLog(`Custom properties set on folder ${folder.id}`);
-	}
-
 	/**
 	 * On templated button click. For template creation
 	 * @param event	ClickEvent for the stamp button
 	 */
 	static buttonClick(event: JQuery.ClickEvent) {
 		const button = event.currentTarget;
-		const folder = button?.parentElement?.parentElement;
+		const folderEL = button?.parentElement?.parentElement;
 
-		let folderID = folder?.dataset["folderId"];
+		let folderID = folderEL?.dataset["folderId"];
 
-		let folderEntity = game.folders.get(folderID);
-		let templateID = folderEntity.getFlag(MODULE_ID, "template");
+		let folder = <TemplatedFolder>game.folders.get(folderID);
 
-		customLog(`Folder ${folderID} activated with template ${templateID}`);
-
-		let templateEntry = <EntityData<Journal>>(
-			(<unknown>game.journal.get(templateID))
+		customLog(
+			`Folder ${folder.id} activated with template ${folder.template.id}`
 		);
 
+		let template = folder.template;
+
 		let data = {
-			name: "New Entry",
+			name: folder.templateSettings.newEntryName,
 			type: "Journal",
-			// Future-proofing a bit here
-			flags: { template: templateID },
 			folder: folderID,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {},
+			permission: { default: Number(folder.templateSettings.newPerms) },
 		};
 
 		let title = "New Templated Entry";
@@ -63,16 +51,22 @@ export class TemplatedFolder extends Folder {
 				callback: (html: JQuery<HTMLElement>) => {
 					const form = html[0].querySelector("form");
 					//@ts-ignore
-					const fd = (new FormDataExtended(form)).toObject();
+					const fd = new FormDataExtended(form).toObject();
 					if (!fd["name"]) delete fd["name"];
 					data = mergeObject(data, fd);
 					JournalEntry.create(data).then(
 						(newEntry: Entity<JournalEntry>) => {
 							newEntry
 								.update({
-									content: templateEntry.data.content,
+									content: (<any>template.data).content,
 								})
 								.then((arg: any) => {
+									// Future-proofing a bit here
+									newEntry.setFlag(
+										MODULE_ID,
+										"template",
+										template.id
+									);
 									newEntry.sheet.render(true);
 								});
 						}
@@ -82,11 +76,7 @@ export class TemplatedFolder extends Folder {
 		});
 	}
 
-	/**
-	 * Given a folder's header, perform all necessary setup to convert it to a templated folder
-	 * @param header Standard HTML header for the folder
-	 */
-	static convertFolder(header: JQuery<HTMLElement>) {
+	static async convertFromButton(header: JQuery<HTMLElement>) {
 		let folderID = header.parent()[0].dataset["folderId"];
 		if (!folderID) {
 			customLog("Error converting folder--ID does not exist", 2);
@@ -95,7 +85,15 @@ export class TemplatedFolder extends Folder {
 
 		let folder = game.folders.get(folderID);
 
-		customLog(`Converting folder ${folderID}`);
+		this.convertFolder(folder);
+	}
+
+	/**
+	 * Given a folder's header, perform all necessary setup to convert it to a templated folder
+	 * @param header Standard HTML header for the folder
+	 */
+	static async convertFolder(folder: Folder) {
+		customLog(`Converting folder ${folder.id}`);
 
 		folder.update({
 			sorting: "m",
@@ -104,57 +102,133 @@ export class TemplatedFolder extends Folder {
 		let data = {
 			name: "Template",
 			type: "Journal",
-			// Future-proofing a bit here
-			flags: { templateFolder: folderID },
-			folder: folderID,
+			folder: folder.id,
 			// Data doesn't seem to be working anyway so I'm going to leave it blank, at least for now
 			data: {
 				sort: -999999,
 			},
 		};
 
-		JournalEntry.create(data).then((template: Entity<JournalEntry>) => {
-			// Guess we have to check this again here or TS will complain. Oh well.
-			if (!folderID) {
-				customLog("Error converting folder--ID does not exist", 2);
-				return;
-			}
+		let template = await JournalEntry.create(data);
 
-			let templateID = template.id;
+		let templateID = template.id;
 
-			customLog(`Template ${templateID} created for folder ${folderID}`);
-			template.sheet.render(true);
+		customLog(`Template ${templateID} created for folder ${folder.id}`);
+		// Future-proofing a bit here
+		await template.setFlag(MODULE_ID, "templateFolder", folder.id);
+		template.sheet.render(true);
 
-			// Current templates object
-			let curTemplates = loadData();
-			curTemplates[folderID] = templateID;
-			game.settings.set(
-				MODULE_ID,
-				`${MODULE_ID}.${Settings.templates}`,
-				curTemplates
-			);
+		// Current templates object
+		let curTemplates = loadData();
+		curTemplates[folder.id] = templateID;
+		await game.settings.set(
+			MODULE_ID,
+			`${MODULE_ID}.${Settings.templates}`,
+			curTemplates
+		);
 
-			// Going to register this directly on the folder
-			folder.setFlag("adventure-log", "template", templateID);
+		let tFolder = new TemplatedFolder(folder);
 
-			customLog(`Template registered to folder`);
-		});
+		await tFolder.setOptions(defaultSettings);
+
+		customLog(`Template registered to folder`);
+
+		return tFolder;
 	}
 
-	// TODO: Delete templated folders properly
-	delete(
-		options: object | undefined = {
-			deleteSubfolders: false,
-			deleteContents: false,
+	/**
+	 * Create a new Folder in this SidebarDirectory
+	 * @param {MouseEvent} event    The originating button click event
+	 * @private
+	 */
+	static _onCreateTemplatedFolder(event: Event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const button = event.currentTarget;
+		if (!button || !(button instanceof HTMLButtonElement)) {
+			customLog("Button doesn't exist, how did you get here?", 3);
+			return;
 		}
-	) {
-		return new Promise<string>(() => {
-			return "Custom deleted";
-		});
+		const parent = button.dataset.parentFolder;
+		const data = {
+			parent: parent ? parent : null,
+			type: "JournalEntry",
+		};
+		const options = {
+			top: button.offsetTop,
+			left:
+				window.innerWidth -
+				310 -
+				Number(FolderConfig.defaultOptions.width),
+		};
+		//@ts-ignore Folder does have createDialog, despiite popular opinion
+		TemplatedFolder.createDialog(data, options);
+	}
+
+	constructor(folder: Folder) {
+		super(folder.data, {});
+		let curTemplates = loadData();
+
+		this.template = game.journal.get(curTemplates[folder.id]);
+
+		game.folders.set(this.id, this);
+	}
+
+	isTemplated = true;
+
+	template: JournalEntry;
+
+	get templateSettings() {
+		return <TemplateSettings>this.getFlag(MODULE_ID, "settings");
+	}
+
+	async setOptions(settings: TemplateSettings) {
+		let curSettings = {};
+		if(this.templateSettings) {
+			curSettings = this.templateSettings;
+		}
+		await this.setFlag(MODULE_ID, "settings", mergeObject(curSettings,settings));
+		customLog(`Folder ${this.id} settings data updated`);
+	}
+
+	/**
+	 * Create a new Templated Folder w/ dialog to set options
+	 * @param {object} data       Initial data with which to populate the creation form
+	 * @param {object} options    Initial positioning and sizing options for the dialog form
+	 * @return {FolderConfig}     An active FolderConfig instance for creating the new Folder entity
+	 */
+	static async createDialog(data: object = {}, options: object = {}) {
+		const folder = new Folder(
+			<EntityData>mergeObject({ sorting: "m" }, data),
+			{}
+		);
+
+		//@ts-ignore
+		let config = new TemplFolderConfig(folder, mergeObject({ creating: true }, options));
+
+		await config.render(true);
+
+		return config;
 	}
 }
+
+// Set default options
+export let defaultSettings: TemplateSettings = {
+	newEntryName: "New Entry",
+	// Oberver permissions by default
+	newPerms: 2,
+	playerCreation: true,
+};
 
 export interface TemplatedFolder extends Folder {
 	testFunc?: Function;
 	isTemplated: boolean;
+	template: JournalEntry;
+	templateSettings: TemplateSettings;
+}
+
+export interface TemplateSettings {
+	newEntryName: string;
+	newPerms: number;
+	playerCreation: boolean;
 }

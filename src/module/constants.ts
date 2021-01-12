@@ -5,4 +5,5 @@ export const MODULE_ABBREV = "ADVL";
 export enum Settings {
 	debug = "debug",
 	templates = "templates",
+	migration = "migration"
 }

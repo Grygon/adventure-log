@@ -1,38 +1,116 @@
-import { TemplatedFolder } from "./templated-folder";
+import { TemplatedFolder, TemplateSettings } from "./templated-folder";
 import { customLog, loadData } from "./helpers";
 import { MODULE_ABBREV, MODULE_ID, Settings } from "./constants";
+import { TemplFolderConfig } from "./templ-folder-config";
 
 declare var libWrapper: any;
 
 export class SetupManager {
+	static async migrate() {
+		if (!game.user.isGM) return;
+
+		let curVer = Number(
+			game.modules
+				.get(MODULE_ID)
+				.data.version.split(".")
+				.slice(0, 2)
+				.join(".")
+		);
+		let migVer = game.settings.get(
+			MODULE_ID,
+			`${MODULE_ID}.${Settings.migration}`
+		);
+
+		customLog(`Current version is ${curVer}, last migrated on ${migVer}`);
+
+		if (curVer === migVer) return;
+		if (migVer === -1) {
+			game.settings.set(
+				MODULE_ID,
+				`${MODULE_ID}.${Settings.migration}`,
+				curVer
+			);
+			return;
+		}
+		if (migVer <= 0.1) {
+			let journals = <Array<JournalEntry>>(<any>game.journal.entries);
+
+			let templates = journals.filter((j) => j.data.flags.templateFolder);
+			let normJournals = journals.filter((j) => j.data.flags.template);
+
+			templates.forEach(async function (journal) {
+				await journal.setFlag(
+					MODULE_ID,
+					"templateFolder",
+					journal.data.flags.templateFolder
+				);
+			});
+			normJournals.forEach(async function (journal) {
+				await journal.setFlag(
+					MODULE_ID,
+					"template",
+					journal.data.flags.template
+				);
+			});
+		}
+		game.settings.set(
+			MODULE_ID,
+			`${MODULE_ID}.${Settings.migration}`,
+			curVer
+		);
+	}
+
 	static overrideFuncs() {
+		// For Folders
+		// Need to put this here because by the time we start registering Templated Folders it's too late
 		libWrapper.register(
 			MODULE_ID,
 			"Folder.prototype.displayed",
 			function () {
 				//@ts-ignore
-				let isTemplated = !!this.getFlag(MODULE_ID, "template");
+				let settings = this.getFlag(MODULE_ID, "settings");
+
+				let alwaysShow = false;
+
+				if (settings) {
+					alwaysShow = settings.playerCreation;
+				}
 
 				return (
 					game.user.isGM ||
-					isTemplated ||
 					//@ts-ignore Just taking this from the standard function
 					!!this.content.length ||
 					//@ts-ignore Just taking this from the standard function
-					this.children.some((c) => c.displayed)
+					this.children.some((c) => c.displayed) ||
+					alwaysShow
+				);
+			},
+			"OVERRIDE"
+		);
+
+		// For Templates
+		libWrapper.register(
+			MODULE_ID,
+			"JournalEntry.prototype.visible",
+			function () {
+				return (
+					//@ts-ignore
+					this.hasPerm(game.user, "OBSERVER", false) &&
+					//@ts-ignore
+					!this.getFlag(MODULE_ID, "templateFolder")
 				);
 			},
 			"OVERRIDE"
 		);
 	}
 
-	static customProperties() {
+	static createTemplates() {
 		let curTemplates = loadData();
 
 		for (var folderID in curTemplates) {
 			let folder = game.folders.get(folderID);
 
-			TemplatedFolder.customProperties(folder);
+			let template = new TemplatedFolder(folder);
 		}
 	}
 
@@ -46,6 +124,8 @@ export class SetupManager {
 		if (!options) {
 			customLog("Issue adding right click menu--no menu items exist!", 4);
 		}
+
+		// For non-templated folders
 		options.push({
 			name: "Create Templated Folder",
 			icon: '<i class="fas fa-clipboard-list"></i>',
@@ -53,7 +133,46 @@ export class SetupManager {
 				return !$(el[0]).parent().hasClass("templated-folder");
 			},
 			callback: (header: JQuery<HTMLElement>) =>
-				TemplatedFolder.convertFolder(header),
+				TemplatedFolder.convertFromButton(header),
+		});
+
+		// Edit standard edit to only exist for non-templates
+		options.find((obj: any) => {
+			return obj.name === "FOLDER.Edit";
+		}).condition = (el: HTMLElement[]) => {
+			return (
+				game.user.isGM &&
+				!$(el[0]).parent().hasClass("templated-folder")
+			);
+		};
+
+		// For templated folders
+		options.unshift({
+			name: "Edit Templated Folder",
+			icon: '<i class="fas fa-edit"></i>',
+			condition: (el: HTMLElement[]) => {
+				return (
+					game.user.isGM &&
+					$(el[0]).parent().hasClass("templated-folder")
+				);
+			},
+			callback: (header: JQuery<HTMLElement>) => {
+				const li = header.parent()[0];
+				let data = li.dataset.folderId;
+				if (!li.dataset.folderId) {
+					customLog("That folder didn't have data!", 3);
+					return;
+				}
+				const folder = game.folders.get(li.dataset.folderId);
+				const options = {
+					top: li.offsetTop,
+					left:
+						window.innerWidth -
+						310 -
+						<any>FolderConfig.defaultOptions.width,
+				};
+				new TemplFolderConfig(folder, options).render(true);
+			},
 		});
 	}
 
@@ -97,16 +216,24 @@ export class SetupManager {
 		let folders = [];
 		let folder: JQuery;
 		for (let i = 0; i < folderIDs.length; i++) {
+			let folderObj = <TemplatedFolder | Folder>(
+				game.folders.get(folderIDs[i])
+			);
+			if (!(folderObj instanceof TemplatedFolder)) continue;
+			if (!folderObj.templateSettings.playerCreation && !game.user.isGM)
+				continue;
+
 			folder = $(html).find(`li[data-folder-id="${folderIDs[i]}"]`);
 			folder.addClass("templated-folder");
 
 			let templateButton = folder
+				.children("header")
 				.find("a.create-folder")
 				.after(templateButtonHtml);
 
 			if (templateButton.length === 0) {
 				templateButton = folder
-					.find("header")
+					.children("header")
 					.append(templateButtonHtml);
 			}
 
@@ -121,6 +248,36 @@ export class SetupManager {
 			event.stopPropagation();
 
 			TemplatedFolder.buttonClick(event);
+		});
+	}
+
+	/**
+	 * Adds a button to top of the sidebar to create a new tFolder
+	 * @param html Page HTML to add to
+	 */
+	static addNewFolderButton(html: JQuery) {
+		const actionButtons = html.find(".action-buttons");
+
+		const newFolderHtml = `<button class="new-templated-folder">
+				<i class="fas fa-book-reader"></i> New Templated Folder
+			</button>`;
+
+		actionButtons.append(newFolderHtml);
+
+		const button = html.find("button.new-templated-folder");
+
+		button.on("click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			const button = event.currentTarget;
+			const parent = button.dataset.parentFolder;
+			const data = {
+				parent: parent ? parent : null,
+				type: "JournalEntry",
+			};
+			let folder = TemplatedFolder._onCreateTemplatedFolder(<MouseEvent><any>event);
+
+			console.log(folder);
 		});
 	}
 
