@@ -36,7 +36,7 @@ export class SetupManager {
 			return;
 		}
 
-		if (migVer <= 0.1) {
+		if (migVer <= 0.2) {
 			let templates = journals.filter((j) => j.data.flags.templateFolder);
 			let normJournals = journals.filter((j) => j.data.flags.template);
 
