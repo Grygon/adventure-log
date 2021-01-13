@@ -171,6 +171,11 @@ export class TemplatedFolder extends Folder {
 
 		this.template = game.journal.get(curTemplates[folder.id]);
 
+		// Temp migration code, can move to proper place in 0.3
+		if(!this.templateSettings) {
+			this.setOptions(defaultSettings);
+		}
+
 		game.folders.set(this.id, this);
 	}
 

@@ -24,6 +24,9 @@ export class SetupManager {
 		customLog(`Current version is ${curVer}, last migrated on ${migVer}`);
 
 		if (curVer === migVer) return;
+
+		let journals = <Array<JournalEntry>>(<any>game.journal.entries);
+
 		if (migVer === -1) {
 			game.settings.set(
 				MODULE_ID,
@@ -32,9 +35,8 @@ export class SetupManager {
 			);
 			return;
 		}
-		if (migVer <= 0.1) {
-			let journals = <Array<JournalEntry>>(<any>game.journal.entries);
 
+		if (migVer <= 0.1) {
 			let templates = journals.filter((j) => j.data.flags.templateFolder);
 			let normJournals = journals.filter((j) => j.data.flags.template);
 
@@ -53,6 +55,7 @@ export class SetupManager {
 				);
 			});
 		}
+		
 		game.settings.set(
 			MODULE_ID,
 			`${MODULE_ID}.${Settings.migration}`,
