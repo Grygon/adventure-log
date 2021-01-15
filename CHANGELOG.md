@@ -1,4 +1,8 @@
 
+# Version 0.2.2
+
+Improved migration to remove existing template entries, since we now have the in-menu option.
+
 # Version 0.2.1
 
 A pretty minor patch.
