@@ -1,3 +1,10 @@
+
+# Version 0.2.1
+
+A pretty minor patch.
+
+#8 - Now will properly migrate over pre-existing folders which did not have settings
+
 # Version 0.2.0
 
 New features:
