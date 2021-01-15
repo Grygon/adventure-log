@@ -23,7 +23,9 @@ export class SetupManager {
 
 		customLog(`Current version is ${curVer}, last migrated on ${migVer}`);
 
-		if (curVer === migVer) return;
+		// Let's just make sure we always migrate while shit's broken
+		// Remove in 0.3
+		// if (curVer === migVer) return;
 
 		let journals = <Array<JournalEntry>>(<any>game.journal.entries);
 
