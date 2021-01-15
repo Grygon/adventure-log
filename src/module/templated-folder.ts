@@ -167,6 +167,10 @@ export class TemplatedFolder extends Folder {
 
 	constructor(folder: Folder) {
 		super(folder.data, {});
+
+		// Pull in data
+		Object.assign(this, folder);
+
 		let curTemplates = loadData();
 
 		this.template = game.journal.get(curTemplates[folder.id]);

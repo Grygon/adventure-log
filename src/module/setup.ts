@@ -46,6 +46,7 @@ export class SetupManager {
 					"templateFolder",
 					journal.data.flags.templateFolder
 				);
+				journal.data.flags.templateFolder = null;
 			});
 			normJournals.forEach(async function (journal) {
 				await journal.setFlag(
@@ -53,6 +54,7 @@ export class SetupManager {
 					"template",
 					journal.data.flags.template
 				);
+				journal.data.flags.template = null;
 			});
 		}
 		
@@ -80,12 +82,12 @@ export class SetupManager {
 				}
 
 				return (
-					game.user.isGM ||
+					game.user.isGM||
+					alwaysShow ||
 					//@ts-ignore Just taking this from the standard function
 					!!this.content.length ||
 					//@ts-ignore Just taking this from the standard function
-					this.children.some((c) => c.displayed) ||
-					alwaysShow
+					this.children.some((c) => c.displayed) 
 				);
 			},
 			"OVERRIDE"
