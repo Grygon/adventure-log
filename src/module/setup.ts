@@ -38,7 +38,7 @@ export class SetupManager {
 			return;
 		}
 
-		if (migVer <= 0.2) {
+		if (migVer < 0.2) {
 			let templates = journals.filter((j) => j.data.flags.templateFolder);
 			let normJournals = journals.filter((j) => j.data.flags.template);
 
@@ -101,9 +101,9 @@ export class SetupManager {
 			"JournalEntry.prototype.visible",
 			function () {
 				return (
-					//@ts-ignore
-					this.hasPerm(game.user, "OBSERVER", false) &&
-					//@ts-ignore
+					//@ts-ignore 0.8
+					this.testUserPermission(game.user, "OBSERVER", false) &&
+					//@ts-ignore 0.8
 					!this.getFlag(MODULE_ID, "templateFolder")
 				);
 			},

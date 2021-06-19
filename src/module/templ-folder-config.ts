@@ -29,7 +29,7 @@ export class TemplFolderConfig extends FormApplication {
 
 	/** @override */
 	get title() {
-		if (this.object._id)
+		if (this.object.id)
 			return `${game.i18n.localize("FOLDER.Update")}: ${
 				this.object.name
 			}`;
@@ -51,7 +51,8 @@ export class TemplFolderConfig extends FormApplication {
 				m: "FOLDER.SortManual",
 			},
 			submitText: game.i18n.localize(
-				this.object._id ? "FOLDER.Update" : "FOLDER.Create"
+				//@ts-ignore 0.8
+				this.object.data.id ? "FOLDER.Update" : "FOLDER.Create"
 			),
 			editing: !(this.options.creating),
 		};
@@ -72,7 +73,8 @@ export class TemplFolderConfig extends FormApplication {
 		} else {
 			this.storeCustom(formData);
 		}
-		this.object.update(formData);
+		//@ts-ignore 0.8
+		folder.update(formData);
 		if(this.options.creating) {
 			//@ts-ignore Clunky but w/e
 			this.object = await TemplatedFolder.convertFolder(folder);

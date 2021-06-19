@@ -161,7 +161,7 @@ export class TemplatedFolder extends Folder {
 				310 -
 				Number(FolderConfig.defaultOptions.width),
 		};
-		//@ts-ignore Folder does have createDialog, despiite popular opinion
+
 		TemplatedFolder.createDialog(data, options);
 	}
 
@@ -208,7 +208,7 @@ export class TemplatedFolder extends Folder {
 	 */
 	static async createDialog(data: object = {}, options: object = {}) {
 		const folder = new Folder(
-			<EntityData>mergeObject({ sorting: "m" }, data),
+			<EntityData>mergeObject({ sorting: "m", name: "New Templated Folder" }, data),
 			{}
 		);
 
