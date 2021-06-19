@@ -44,12 +44,21 @@ Hooks.once("setup", function () {
 /* ------------------------------------ */
 Hooks.once("ready", function () {
 	// Do anything once the module is ready
-	SetupManager.migrate();
-
+	
 	// Clean up our stored data, removing folders that no longer exist
 	SetupManager.cleanupData();
-	SetupManager.createTemplates();
 });
+
+// Only run once, set up our render info
+Hooks.once(
+	"renderJournalDirectory",
+	(app: Application, html: JQuery, data: EntityData) => {
+
+		// Need to move this down, ready is too late now...
+		SetupManager.migrate();
+	
+		SetupManager.createTemplates();
+	});
 
 /* ------------------------------------ */
 /* For folder right click				*/

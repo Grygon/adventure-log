@@ -23,9 +23,7 @@ export class SetupManager {
 
 		customLog(`Current version is ${curVer}, last migrated on ${migVer}`);
 
-		// Let's just make sure we always migrate while shit's broken
-		// Remove in 0.3
-		// if (curVer === migVer) return;
+		if (curVer === migVer) return;
 
 		let journals = <Array<JournalEntry>>(<any>game.journal.entries);
 
@@ -38,7 +36,7 @@ export class SetupManager {
 			return;
 		}
 
-		if (migVer < 0.2) {
+		if (migVer <= 0.2) {
 			let templates = journals.filter((j) => j.data.flags.templateFolder);
 			let normJournals = journals.filter((j) => j.data.flags.template);
 
@@ -263,6 +261,10 @@ export class SetupManager {
 	 * @param html Page HTML to add to
 	 */
 	static addNewFolderButton(html: JQuery) {
+		if (!game.user.isGM) {
+			customLog("User is not a GM!");
+			return;
+		}
 		const actionButtons = html.find(".action-buttons");
 
 		const newFolderHtml = `<button class="new-templated-folder">
@@ -289,7 +291,7 @@ export class SetupManager {
 	}
 
 	/**
-	 * Assigns CSS classes to all templated folders
+	 * Assigns CSS classes to all templated entries
 	 * @param html HTML to search for templates in
 	 */
 	static setClasses(html: JQuery<HTMLElement>) {

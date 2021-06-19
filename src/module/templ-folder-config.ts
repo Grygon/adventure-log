@@ -52,7 +52,7 @@ export class TemplFolderConfig extends FormApplication {
 			},
 			submitText: game.i18n.localize(
 				//@ts-ignore 0.8
-				this.object.data.id ? "FOLDER.Update" : "FOLDER.Create"
+				this.object.data._id ? "FOLDER.Update" : "FOLDER.Create"
 			),
 			editing: !(this.options.creating),
 		};
@@ -70,17 +70,10 @@ export class TemplFolderConfig extends FormApplication {
 		let created = false;
 		if (this.options.creating){
 			folder = await Folder.create(mergeObject(this.object.data, formData))
-		} else {
-			this.storeCustom(formData);
-		}
-		//@ts-ignore 0.8
-		folder.update(formData);
-		if(this.options.creating) {
-			//@ts-ignore Clunky but w/e
+			folder.update(formData);
 			this.object = await TemplatedFolder.convertFolder(folder);
-			this.storeCustom(formData);
 		}
-
+		this.storeCustom(formData);
 	}
 
 	storeCustom(formData: any) {
